@@ -1,0 +1,15 @@
+{
+  "name": "EansResumeProject",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#master",
+    "core-iconset": "Polymer/core-iconset#master",
+    "core-icons": "Polymer/core-icons#master",
+    "core-icon": "Polymer/core-icon#master",
+    "core-elements": "Polymer/core-elements#master",
+    "paper-elements": "Polymer/paper-elements#master",
+    "platform-dev" : "Polymer/platform-dev#master",
+    "polymer-dev" : "Polymer/polymer-dev#master",
+    "core-animated-pages" : "Polymer/core-animated-pages#master"
+  }
+}

@@ -1,26 +1,56 @@
-<link rel="import" href="../core-icon-button/core-icon-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../core-toolbar/core-toolbar.html">
 <link rel="import" href="../core-scroll-header-panel/core-scroll-header-panel.html">
 <link rel="import" href="../core-icons/social-icons.html">
+<link rel="import" href="../core-icons/core-icons.html">
 <link rel="import" href="../core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../core-animated-pages/transitions/slide-from-right.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dialog/paper-dialog-transition.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="safe-html.html">
+<link rel="import" href="grid-hero-displayer.html">
+
 
 <polymer-element name="eans-resume">
 
   <template>
     <style>    
       #core_scroll_header_panel {
-        width: 100%;
-        height: 100%;
-        left: 0px;
-        top: 0px;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         position: absolute;
+      }
+      #eanImage{
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: block;
+        background-image: url(ean.jpg);
+        margin: 2px;
+      }
+      #eanImageWrapper{
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: block;
+        background-color: white;
       }
       #core_toolbar {
         color: rgb(241, 241, 241);
         fill: rgb(241, 241, 241);
         background-color: rgb(66, 133, 244);
       }
-      #section {
+      #primarySection {
+        height: 5000px;
+        background: linear-gradient(rgb(214, 227, 231), rgb(173, 216, 230));
+      }
+      #projectResumeSection {
         height: 5000px;
         background: linear-gradient(rgb(214, 227, 231), rgb(173, 216, 230));
       }
@@ -30,129 +60,217 @@
         border-bottom-right-radius: 2px;
         border-bottom-left-radius: 2px;
         box-shadow: rgba(0, 0, 0, 0.0980392) 0px 2px 4px, rgba(0, 0, 0, 0.0980392) 0px 0px 3px;
-        margin: 0px 8px 8px;
+        margin: 16px;
         padding: 8px;
         background-color: rgb(255, 255, 255);
+      }
+      .slideIn {
+        
       }
       .sectionHeader
       {
         font-size: xx-large;
         padding:16px 0px 0px 8px;
       }
-      #languageText
-      {
-        padding:16px 0px 0px 8px;
-      }
-      .languageName
-      {
-        padding:0px 16px 0px 8px;
-        font-weight:bold;
-      }
-      #languageExperience
-      {
-        padding:0px 16px 0px 8px;
-      }
-      #languageUrl
-      {
-        
-        padding:0px 16px 0px 8px;
-      }
       a
       {
         text-decoration: none;
       }
+      .experienceName
+      {
+        font-size: large;
+        font-weight:bold;
+      }
+      .experienceName
+      {
+        font-size: normal;
+        font-weight: normal;
+      }
+      .experienceHeader
+      {
+        width: 100%;
+        text-align: center;
+      }
+      .experienceContent
+      {
+        padding: 0px 8px 8px 8px;
+      }
+      .refName
+      {
+        float: center;
+        text-align: center;
+      }
+      .refText
+      {
+        max-width: 200px;
+        padding: 8px;
+      }
+      #loadingWrapper{
+        bottom: 0;
+        height: 50px;
+        left: 0;
+        margin: auto;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        text-align: center;
+      }
+      #loadingSection
+      {
+        height:100%;
+        width:100%;
+      }
+      #primaryPages
+      {
+        height:100%;
+        width:100%;
+      }
     </style>
-    <core-scroll-header-panel condenses headerheight="192" id="core_scroll_header_panel">
-      <core-toolbar id="core_toolbar" class="tall">
-      <core-icon-button icon="menu"></core-icon-button>
-      <div id="div" flex></div>
-      <core-icon-button icon="info"></core-icon-button>
-      <core-icon-button icon="social:share-alt"></core-icon-button>
-      <div class="bottom indent">Ean Lombardo's Resume</div>
+    <core-scroll-header-panel id="core_scroll_header_panel">
+      <core-toolbar id="core_toolbar" flex>
+        <div hidden?="{{page > 1}}" id="eanImageWrapper"><div id="eanImage"></div></div>
+        <div hidden?="{{page > 1}}" flex>Ean Lombardo's Resume</div>
+        <paper-icon-button hidden?="{{page < 2}}" icon="arrow-back" on-tap="{{backToResume}}"></paper-icon-button>
+        <div hidden?="{{page < 2}}" flex>Project Resume</div>
+        <paper-icon-button hidden?="{{page > 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
+        <paper-icon-button icon="social:share-alt"></paper-icon-button>
       </core-toolbar>
-      <section id="section" content vertical layout>
+      <core-animated-pages id="primaryPages" selected="{{page}}" transitions="cross-fade-all" content>
+      <section id="loadingSection">
+      <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" backdrop="true" autoCloseDisabled="true">
+        <paper-input label="Access Key" floatingLabel="true" value="{{accessKeyHolder.AccessKey}}"></paper-input>
+        <paper-button label="Ok" affirmative="" on-tap="{{customize}}"></paper-button>
+      </paper-dialog>
+        <div id="loadingWrapper" cross-fade>
+          <div id="loadingTitle">Customizing Resume</div>
+          <paper-progress value="{{totalLoaded}}" max="{{maxLoad}}"></paper-progress>
+        </div>
+      </section>
+      <section id="primarySection" vertical layout>
+      <section id="introductionSection">
+          <template repeat="{{i in introductions}}">
+            <core-card class="core_card" vertical layout><safe-html html="{{i.content}}"></safe-html></core-card>
+          </template>
+       </section>
         <section id="achievementSection">
           <div class="sectionHeader">Achievements</div>
-          <template id="template" repeat="{{a in achievements}}">
+          <template repeat="{{a in achievements}}">
             <core-card class="core_card" vertical layout>{{a.text}}</core-card>
           </template>
         </section>
+        <section id="experienceSection">
+          <div class="sectionHeader">Experience</div>
+          <template id="template" repeat="{{e in experiences}}">
+            <core-card class="core_card" vertical layout>
+              <div class="experienceHeader">
+                <div><a class="experienceName" href="{{e.companyUrl}}">
+                  {{e.companyName}}
+                </a></div>
+                {{e.workPeriod}}
+              </div>
+              <div class="experienceContent"><safe-html html="{{e.content}}"></safe-html></div>
+            </core-card>
+          </template>
+        </section>
+        <section id="referencesSection">
+           <div class="sectionHeader">References</div>
+           <div id="referencesContainer" horizontal layout wrap around-justified start>
+             <template id="template" repeat="{{r in references}}">
+                <core-card class="core_card" vertical layout>
+                  <div class="refName">{{r.name}}</div>
+                  <div class="refPhone"><a href="tel:{r.phone}}">{{r.phone}}</a></div>
+                  <div class="refEmail"><a href="tel:{r.email}}">{{r.email}}</a></div>
+                  <div class="refText">{{r.text}}</div>
+                </core-card>
+              </template>
+           </div>
+        </section>
         <section id="languageSection">
           <div class="sectionHeader">Languages</div>
-          <core-animated-pages selected="{{page}}" transitions="hero-transition" notap>
-            <section>
-              <div horizontal layout wrap around-justified start layout on-tap="{{transitionLanguage}}">
-                <template id="template" repeat="{{l in languages}}">
-                  <core-card class="core_card" vertical layout hero hero-id="language-{{l.name}}" hero?="{{selectedLanguage === l}}">
-                    <img src="{{l.image}}" hero hero?="{{selectedLanguage === l}}" hero-id="language-{{l.name}}-image" width="100px"/>
-                    <div class="languageName" hero hero-id="language-{{l.name}}-name" hero?="{{selectedLanguage === l}}" >{{l.name}}</div>
-                  </core-card>
-                </template>
-              </div>
-            </section>
-            <section>
-                <core-card class="core_card" vertical layout hero on-tap="{{transitionLanguage}}" hero-id="language-{{selectedLanguage.name}}">
-                  <div id="languageDetailsHeader" layout horizontal start>
-                    <img src="{{selectedLanguage.image}}" hero hero-id="language-{{selectedLanguage.name}}-image" width="100px"/>
-                    <div id="languageDetailHeaderRight" flex>
-                      <div class="languageName"  hero hero-id="language-{{l.name}}-name">
-                        {{selectedLanguage.name}}
-                      </div>
-                      <div id="languageExperience">
-                        Experience: {{selectedLanguage.experience}}
-                      </div>
-                      <div id="languageUrl">
-                        <a href="{{selectedLanguage.url}}">Website</a>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="languageText">
-                    {{selectedLanguage.text}}
-                  </div>
-              </core-card>
-            </section>
-          </core-animated-pages>
+          <grid-hero-displayer id="languageDisplayer" items="{{languages}}"></grid-hero-displayer>
         </section>
       </section>
+      <section id="projectResumeSection">
+        blah
+      </section>
+      </core-animated-pages>
     </core-scroll-header-panel>
   </template>
   <script>
-    Polymer('eans-resume', {
-      page:0,
-      selectedLanguage: null,
-      transitionLanguage: function(event)
-      {
-        if(this.page == 0 && event.target.templateInstance.model.l)
-        {
-          this.selectedLanguage = event.target.templateInstance.model.l;
-          this.page = 1;
-        }
-        else
-        {
-          this.page = 0;
-        }
-      },
-      
-      ready: function ()
-      {
-        this.achievements = [{text:"Hello"},{text:"hello again"}];
-        this.languages = [
-          {name : "Java", image : "http://onsitepcsolution.com/wp-content/uploads/2014/08/java_tech.jpg", text: "I got started with Java in high school when I started Android development. Now it's become my primary language. I prefer java when I need to build powerful, high level systems that run well across devices, or when I am doing android development.", experience : "Near Expert", url : "http://java.com"},
-          {name : "C++", image : "http://www.tekdig.com/wp-content/uploads/2014/08/c++-logo.png", text: "C++ was my first language after PHP. I used to prefer C++ when developing low level systems that need to run efficiently, now I prefer GO, though I am not as askilled in it.", experience : "Near Expert", url : "http://www.open-std.org/jtc1/sc22/wg21/"},
-          {name : "PHP", image : "http://www.ddesignerr.com/wp-content/uploads/2013/04/php-logo1.jpg", text: "PHP was my first language. I used PHP to build a number of simple web applications. Now I prefer GO HTML templates when it comes to server side web development.", experience : "Near Expert", url : "http://php.net"},
-          {name : "C#", image : "http://codesmesh.com/wp-content/uploads/2013/02/C_Sharp1.png", text: "I have learned C# over the many projects I have done during my internships. C# is my language of choice when developing applications that integrate with other Microsoft applications and services.", experience : "Moderate", url : "http://msdn.microsoft.com/en-us/vstudio/hh341490.aspx"},
-          {name : "GO", image : "https://golang.org/doc/gopher/frontpage.png", text: "GO is a new language to me, I have only been working with it a couple of months and have yet to take on a real project with it. In that small time however, go has already become my prefered language when I need efficiency or when doing server side development.", experience : "Still Learning", url : "http://golang.org"},
-          {name : "Javascript", image : "http://ocpsoft.org/wp-content/uploads/2013/01/javascript_logo_unofficial-300x300.png?b704a8", text: "Javascript was a language I've picked up over my history of web development with PHP and C#. Javascript used to be the only choice when it came to in browser development, however, when Chrome get's a Dart virtual machine, I won't be writing much Javascript anymore.", experience : "Moderate", url : "http://www.ecma-international.org/ecma-262/5.1/"},
-          {name : "PHP", image : "http://www.ddesignerr.com/wp-content/uploads/2013/04/php-logo1.jpg", text: "PHP was my first language. I used PHP to build a number of simple web applications. No I prefer GO HTML templates when it comes to server side web development.", experience : "Moderate"}
-      ];
-      }
-    });
-    
+  
+  var apis = ['experiences','achievements','languages','introductions','projects','references','technologies'];
+  var ready = false;
     function afterGapiLoad()
     {
-      gapi.client.load('acheivement','v1',function() {
-        alert('Sup');
-      },'http://localhost:8080/_ah/api');
+    Polymer('eans-resume', {
+      ready: function ()
+      {
+        ready = true;
+        this.$.accessDialog.toggle('paper-dialog-transition-bottom');
+      },
+      transitionItem: function(event)
+      {
+        alert("wrong");
+      },
+      maxLoad : apis.length,
+      totalLoaded: 0,
+      page:0,
+      showProjectResume : function(event)
+      {
+        this.page = 2;
+      },
+      backToResume: function(event)
+      {
+        this.page = 1;
+      },
+      accessKeyHolder: {AccessKey : ""},
+      customize: function(event)
+      {
+        if(this.accessKeyHolder.AccessKey == "")
+        {
+          this.accessKeyHolder.AccessKey = "nokey";
+        }
+        for(var i =0;i<apis.length;i++)
+        {
+          loadItemsFromApi(apis[i],this.accessKeyHolder)
+        }
+      }
+    });
+    }
+    
+    function registerSingleLoadDone()
+    {
+      var element = document.querySelector('eans-resume');
+      element.totalLoaded = element.totalLoaded + 1;
+      
+      if(element.totalLoaded == element.maxLoad)
+      {
+        element.page=1;
+        window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300)
+      }
+    }
+    
+    function loadItemsFromApi(apiName,accessKey)
+    {
+      gapi.client.load(apiName,'v1',function() {
+        gapi.client[apiName].list(accessKey).execute(function(res){
+          setItems(res.items,apiName);
+        });
+      },'https://eanresume.appspot.com/_ah/api');
+    }
+    
+    function setItems(items,apiName)
+    {
+      if(!ready)
+      {
+        window.setTimeout(function(){setItems(items,apiName);},300)
+      }
+      else
+      {
+        document.querySelector('eans-resume')[apiName] = items;
+        registerSingleLoadDone();
+      }
     }
   </script>
     <script src="https://apis.google.com/js/client.js?onload=afterGapiLoad">

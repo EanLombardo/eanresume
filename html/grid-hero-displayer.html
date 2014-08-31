@@ -1,0 +1,91 @@
+<link rel="import" href="../core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<polymer-element name="grid-hero-displayer" attributes="items">
+  <template>
+  <style>
+    .itemText
+      {
+        padding:16px 0px 0px 8px;
+      }
+      .itemName
+      {
+        padding:0px 16px 0px 8px;
+        font-weight:bold;
+      }
+      .itemExperience
+      {
+        padding:0px 16px 0px 8px;
+      }
+      .itemUrl
+      {
+        padding:0px 16px 0px 8px;
+      }
+      .core_card {
+        border-top-left-radius: 2px;
+        border-top-right-radius: 2px;
+        border-bottom-right-radius: 2px;
+        border-bottom-left-radius: 2px;
+        box-shadow: rgba(0, 0, 0, 0.0980392) 0px 2px 4px, rgba(0, 0, 0, 0.0980392) 0px 0px 3px;
+        margin: 8px;
+        padding: 16px;
+        background-color: rgb(255, 255, 255);
+      }
+  </style>
+    <core-animated-pages selected="{{page}}" transitions="hero-transition">
+            <section>
+              <div horizontal layout wrap around-justified start layout on-tap="{{transitionItem}}">
+                <template repeat="{{i in items}}">
+                  <core-card class="core_card" vertical layout hero hero-id="item-{{i.name}}" hero?="{{selectedItem === i}}">
+                    <img src="{{i.image}}" hero hero?="{{selectedItem === i}}" hero-id="item-{{i.name}}-image" width="100px"/>
+                    <div class="itenName" hero hero-id="item-{{i.name}}-name" hero?="{{selectedItem === i}}" >{{i.name}}</div>
+                  </core-card>
+                </template>
+              </div>
+            </section>
+            <section>
+                <core-card class="core_card" vertical layout hero on-tap="{{transitionItem}}" hero-id="item-{{selectedItem.name}}">
+                  <div layout horizontal start>
+                    <img src="{{selectedItem.image}}" hero hero-id="item-{{selectedItem.name}}-image" width="100px"/>
+                    <div flex>
+                      <div class="itemName"  hero hero-id="item-{{selectedItem.name}}-name">
+                        {{selectedItem.name}}
+                      </div>
+                      <div class="itemExperience">
+                        Experience: {{selectedItem.experience}}
+                      </div>
+                      <div class="itemUrl">
+                        <a href="{{selectedItem.url}}">Website</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="itemText">
+                    {{selectedItem.text}}
+                  </div>
+              </core-card>
+            </section>
+          </core-animated-pages>
+  </template>
+<script>
+  Polymer('grid-hero-displayer', {
+    page:0,
+    items: [],
+      selectedItem: null,
+      transitionItem: function(event)
+      {
+        if(this.page == 0 && event.target.templateInstance.model.i)
+        {
+          this.selectedItem = event.target.templateInstance.model.i;
+          this.page = 1;
+        }
+        else
+        {
+          this.page = 0;
+        }
+      },
+    ready: function()
+    {
+      //this.items = [{name:"test"}];
+    }
+  });
+</script>
+</polymer-element>
