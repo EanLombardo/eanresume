@@ -21,5 +21,7 @@ func init() {
 	RegisterProjectService()
 	RegisterReferenceService()
 	RegisterTechnologyService()
+	RegisterAccessKeyService()
+	RegisterDocumentService()
 	endpoints.HandleHttp()
 }

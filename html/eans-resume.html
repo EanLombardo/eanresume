@@ -11,20 +11,25 @@
 <link rel="import" href="../paper-dialog/paper-dialog-transition.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-fab/paper-fab.html">
 <link rel="import" href="safe-html.html">
+<link rel="import" href="document-grid.html">
 <link rel="import" href="grid-hero-displayer.html">
 
 
 <polymer-element name="eans-resume">
 
   <template>
-    <style>    
+    <style>
       #core_scroll_header_panel {
         top: 0;
-        right: 0;
-        bottom: 0;
         left: 0;
+        height:100%;
+        width:100%;
         position: absolute;
+        background:#EEEEEE;
       }
       #eanImage{
         border-radius: 50%;
@@ -46,23 +51,19 @@
         fill: rgb(241, 241, 241);
         background-color: rgb(66, 133, 244);
       }
-      #primarySection {
-        height: 5000px;
-        background: linear-gradient(rgb(214, 227, 231), rgb(173, 216, 230));
+      .sectionPage {
+        display: block;
+        background-color: #fff;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+        border-radius: 2px;
+        overflow: hidden;
+        max-width:1200px;
+        margin: 32px auto 32px auto;
+        position:relative !important;
       }
-      #projectResumeSection {
-        height: 5000px;
-        background: linear-gradient(rgb(214, 227, 231), rgb(173, 216, 230));
-      }
-      .core_card {
-        border-top-left-radius: 2px;
-        border-top-right-radius: 2px;
-        border-bottom-right-radius: 2px;
-        border-bottom-left-radius: 2px;
-        box-shadow: rgba(0, 0, 0, 0.0980392) 0px 2px 4px, rgba(0, 0, 0, 0.0980392) 0px 0px 3px;
+      .sector {
         margin: 16px;
         padding: 8px;
-        background-color: rgb(255, 255, 255);
       }
       .slideIn {
         
@@ -70,7 +71,7 @@
       .sectionHeader
       {
         font-size: xx-large;
-        padding:16px 0px 0px 8px;
+        padding:16px 0px 0px 16px;
       }
       a
       {
@@ -95,6 +96,10 @@
       {
         padding: 0px 8px 8px 8px;
       }
+      #projectResumeInfo
+      {
+        padding:32px;
+      }
       .refName
       {
         float: center;
@@ -113,7 +118,7 @@
         position: absolute;
         top: 0;
         right: 0;
-        width: 200px;
+        width: 500px;
         text-align: center;
       }
       #loadingSection
@@ -126,43 +131,102 @@
         height:100%;
         width:100%;
       }
+      #fab
+      {
+        bottom:16px;
+        right:24px;
+        position:absolute;
+        z-index:1;
+        color: rgb(241, 241, 241);
+        fill: rgb(241, 241, 241);
+        background-color: rgb(66, 133, 244);
+      }
+      .aShareLink
+      {
+        width:100%;
+        text-align:center;
+      }
+      paper-progress::shadow #activeProgress {
+        background-color: #4285F4;
+      }
+      .blue
+      {
+        color:blue;
+      }
+      @media (max-width: 1200px) {
+      .sectionPage {
+        margin: auto;
+        padding: 0px 0px 64px 0px;
+      }
+      #fab
+      {
+        bottom:8px;
+        right:8px;
+      }
+      .sector {
+        margin: 8px;
+        padding:0px;
+      }
+      .sectionHeader
+      {
+        font-size: x-large;
+        padding:8px;
+      }
+    }
     </style>
+    <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
+        <p>If you have been given an Access Key, please enter it below. Otherwise leave the field blank.</p>
+        <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.AccessKey}}"></paper-input>
+        <p>Access keys allow you to see a version of the resume that is customized for your oganization. As well as private imformation like references and transcripts.</p>
+        <paper-button id="accessKeyButton" label="Ok" on-tap="{{customize}}" affirmative></paper-button>
+    </paper-dialog>
+    <paper-toast id="accessKeyToast" text="{{accessKeyHolder.AccessKey}} is not a valid Access Key"></paper-toast>
+    <paper-fab id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
+    <paper-dialog id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
+    <div class="aShareLink">
+     <p>Copy the link below and share this resume with whomever you like.</p>
+     <div hidden?="{{accessKeyHolder.AccessKey == 'nokey'}}">
+       <paper-checkbox checked="{{sharePrivate}}" label="I am sharing this within my organization"></paper-checkbox>
+     </div>
+       <p>
+        <a on-click={{copy}} class="blue" hidden?="{{sharePrivate}}" >http://eanlom.info/?a=nokey</a>
+        <a on-click={{copy}} class="blue" hidden?="{{!sharePrivate}}">http://eanlom.info/?a={{accessKeyHolder.AccessKey}}</a>
+      </p>
+    </div>
+    <paper-button label="Ok" affirmative></paper-button>
+    </paper-dialog>
     <core-scroll-header-panel id="core_scroll_header_panel">
       <core-toolbar id="core_toolbar" flex>
         <div hidden?="{{page > 1}}" id="eanImageWrapper"><div id="eanImage"></div></div>
-        <div hidden?="{{page > 1}}" flex>Ean Lombardo's Resume</div>
+        <div hidden?="{{page > 1}}" flex>Ean's Resume</div>
         <paper-icon-button hidden?="{{page < 2}}" icon="arrow-back" on-tap="{{backToResume}}"></paper-icon-button>
         <div hidden?="{{page < 2}}" flex>Project Resume</div>
         <paper-icon-button hidden?="{{page > 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
-        <paper-icon-button icon="social:share-alt"></paper-icon-button>
+        <paper-icon-button icon="social:share-alt" on-click="{{share}}"></paper-icon-button>
       </core-toolbar>
       <core-animated-pages id="primaryPages" selected="{{page}}" transitions="cross-fade-all" content>
       <section id="loadingSection">
-      <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" backdrop="true" autoCloseDisabled="true">
-        <paper-input label="Access Key" floatingLabel="true" value="{{accessKeyHolder.AccessKey}}"></paper-input>
-        <paper-button label="Ok" affirmative="" on-tap="{{customize}}"></paper-button>
-      </paper-dialog>
-        <div id="loadingWrapper" cross-fade>
-          <div id="loadingTitle">Customizing Resume</div>
+        <div id="loadingWrapper">
+          <div id="loadingTitle">{{customText}}</div>
           <paper-progress value="{{totalLoaded}}" max="{{maxLoad}}"></paper-progress>
         </div>
       </section>
-      <section id="primarySection" vertical layout>
+      <section id="primarySection" class="sectionPage" vertical layout>
       <section id="introductionSection">
           <template repeat="{{i in introductions}}">
-            <core-card class="core_card" vertical layout><safe-html html="{{i.content}}"></safe-html></core-card>
+            <div class="sector" vertical layout><safe-html html="{{i.content}}"></safe-html></div>
           </template>
        </section>
         <section id="achievementSection">
           <div class="sectionHeader">Achievements</div>
           <template repeat="{{a in achievements}}">
-            <core-card class="core_card" vertical layout>{{a.text}}</core-card>
+            <div class="sector" vertical layout>{{a.text}}</div>
           </template>
         </section>
         <section id="experienceSection">
           <div class="sectionHeader">Experience</div>
           <template id="template" repeat="{{e in experiences}}">
-            <core-card class="core_card" vertical layout>
+            <div class="sector" vertical layout>
               <div class="experienceHeader">
                 <div><a class="experienceName" href="{{e.companyUrl}}">
                   {{e.companyName}}
@@ -170,52 +234,174 @@
                 {{e.workPeriod}}
               </div>
               <div class="experienceContent"><safe-html html="{{e.content}}"></safe-html></div>
-            </core-card>
+            </div>
           </template>
         </section>
-        <section id="referencesSection">
+        <section id="referencesSection" hidden?="{{references == null || references.length == 0}}">
            <div class="sectionHeader">References</div>
            <div id="referencesContainer" horizontal layout wrap around-justified start>
              <template id="template" repeat="{{r in references}}">
-                <core-card class="core_card" vertical layout>
+                <div class="sector" vertical layout>
                   <div class="refName">{{r.name}}</div>
                   <div class="refPhone"><a href="tel:{r.phone}}">{{r.phone}}</a></div>
                   <div class="refEmail"><a href="tel:{r.email}}">{{r.email}}</a></div>
                   <div class="refText">{{r.text}}</div>
-                </core-card>
+                </div>
               </template>
            </div>
         </section>
+        <section id="documentSection" hidden?="{{documents == null || references.length == 0}}">
+          <div class="sectionHeader">Documents</div>
+          <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
+        </section>
         <section id="languageSection">
           <div class="sectionHeader">Languages</div>
-          <grid-hero-displayer id="languageDisplayer" items="{{languages}}"></grid-hero-displayer>
+          <grid-hero-displayer id="languageDisplayer" items="{{languages}}" ga="{{ga}}"></grid-hero-displayer>
+        </section>
+        <section id="technologiesSection">
+          <div class="sectionHeader">Technologies</div>
+          <grid-hero-displayer id="technologiesDisplayers" items="{{technologies}}" ga="{{ga}}"></grid-hero-displayer>
+        </section>
+        <section id="projectsSection">
+        <div class="sectionHeader">My Projects</div>
+          <template id="projectsTemplate" repeat="{{p in projects}}">
+            <div class="sector" vertical layout>
+              <div class="experienceHeader">
+                <div><a class="experienceName" href="{{p.repoUrl}}">
+                  {{p.name}}
+                </a></div>
+                {{p.technologies}}
+              </div>
+              <div class="experienceContent"><safe-html html="{{p.content}}"></safe-html></div>
+            </div>
+          </template>
         </section>
       </section>
-      <section id="projectResumeSection">
-        blah
+      <section id="projectResumeSection" class="sectionPage">
+      <div id="projectResumeInfo">
+        <p><a href="https://github.com/EanLombardo/eanresume"><strong>Project Resume</strong></a></p>
+
+<p>Project Resume was a quickly put together project designed to address all of the flaws in paper resumes or resumes as a share-able document (such as a Google Doc). The application was build from the ground up in 8 days, and uses modern design principals in both application and user experience design, as well as the latest in technologies.</p>
+
+<p><strong>The problems with paper resumes</strong></p>
+
+<ul>
+	<li>
+	<p>Sharing a piece of paper is hard</p>
+
+	<ul>
+		<li>
+		<p>You either have to scan it and email it, or copy it and physically pass it around.</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>Managing custom resumes can become ridiculous</p>
+
+	<ul>
+		<li>
+		<p>As you build customized resumes for more and more potential employers, managing each document becomes harder and harder.</p>
+		</li>
+		<li>
+		<p>You usually end up with a resume that only has different wording in some places, otherwise properly customizing 20 resumes would take weeks.</p>
+		</li>
+		<li>
+		<p>This is also true of resumes as a share-able document</Sharep>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>Paper resumes expire</p>
+
+	<ul>
+		<li>
+		<p>When a potential employer holds on to a resume for any period of time the resume can quickly become out of date, and potential employers can miss out on new and important information.</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>Paper resumes don&rsquo;t show developers off</p>
+
+	<ul>
+		<li>
+		<p>A graphical designer can build a really cool and original resume that shows of how good they are at their trade. But for almost every other field a resume is all talk, and does nothing to show how you handle your trade.</p>
+		</li>
+		<li>
+		<p>This is also true of resumes as a share-able document</p>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+<p><strong>The Goal</strong></p>
+
+<p>Project Resume is meant to address all of the problems with paper resumes. It allows resumes to be easily customized just by manipulating data objects in the datastore, and the application uses these objects to automatically customize itself. Because the application is built in this way, there is no way for a potential employer to have an out of data resume, as every time the page is visited up to date information is shown. The coolest thing though, is the resume shows me off. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a> a potential employer can immediately see how I handle my trade, before even speaking with me.</p>
+
+<p>Plus I have my own public REST api for my resume, how many people can say that! (<a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API)</a></p>
+
+<p><strong>Design</strong></p>
+
+<p>The design goal of this application was for me to, basically, show off. Project Resume was designed from the ground up using the most modern technologies I was aware of, and as such, Project Resume was not only my first real Go project, but also my first Polymer project, and my first AppEngine project.</p>
+
+<p><strong>The frontend</strong></p>
+
+<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend speaks with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the AccessKey given when the front end first loads. The AccessKey can be given as a URL parameter , or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
+
+<p><strong>The Backend</strong></p>
+
+<p>The backend is several CloudEndpoints based REST Apis written in Go. Data objects are stored in Cloud Datastore with an access control list that defines whether or not each item should be shown to a viewer with a specific access key. The service then filters out all of the requested data items and exposes them to the client while stripping the access control list so that the client can&rsquo;t see other parties AccessKeys.</p>
+
+<p>Designing the application in this way allows the resume to automatically customize itself based on the AccessKey provided by hiding objects, and then showing different versions of objects based on the access control list.</p>
+
+<p><strong>UX Design</strong></p>
+
+<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy, so all I have to do is build a browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience.</p>
+
+      </div>
       </section>
       </core-animated-pages>
     </core-scroll-header-panel>
   </template>
   <script>
   
-  var apis = ['experiences','achievements','languages','introductions','projects','references','technologies'];
-  var ready = false;
-    function afterGapiLoad()
-    {
+  var apis = ['experiences','achievements','languages','introductions','projects','references','technologies','documents'];
+  var polymerReady = false;
+  var gapiReady = false;
+  
     Polymer('eans-resume', {
       ready: function ()
       {
-        ready = true;
-        this.$.accessDialog.toggle('paper-dialog-transition-bottom');
+        CoreStyle.g.paperInput.focusedColor = "#4285F4";
+        polymerReady = true;
+        trueReady();
+        this.ga = ga;
       },
-      transitionItem: function(event)
+      share: function(event)
       {
-        alert("wrong");
+        this.$.shareDialog.toggle();
       },
       maxLoad : apis.length,
+      customText: "Loading public resume",
       totalLoaded: 0,
       page:0,
+      sharePrivate: false,
+      ga : function(){},
+      emailEan : function(event)
+      {
+        document.location.href = "mailto:el3h6@mst.edu";
+      },
+      copy: function(event)
+      {
+        if (document.selection) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(event.target);
+            range.select();
+        } else if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNode(event.target);
+            window.getSelection().addRange(range);
+        }
+      },
       showProjectResume : function(event)
       {
         this.page = 2;
@@ -227,16 +413,66 @@
       accessKeyHolder: {AccessKey : ""},
       customize: function(event)
       {
+        var element = this;
         if(this.accessKeyHolder.AccessKey == "")
         {
           this.accessKeyHolder.AccessKey = "nokey";
+          
+          for(var i =0;i<apis.length;i++)
+          {
+            loadItemsFromApi(apis[i],element.accessKeyHolder)
+          }
         }
-        for(var i =0;i<apis.length;i++)
+        else
         {
-          loadItemsFromApi(apis[i],this.accessKeyHolder)
+           gapi.client.accesskeys.get(element.accessKeyHolder).execute(function (resp){
+             if(resp.AccessKey == element.accessKeyHolder.AccessKey)
+             {
+                if(element.accessKeyHolder.AccessKey != "nokey")
+                {
+                  element.customText = "Customizing resume for " + resp.Owner;
+                }
+                for(var i =0;i<apis.length;i++)
+                {
+                  loadItemsFromApi(apis[i],element.accessKeyHolder)
+                }
+             }
+             else
+             {
+               element.$.accessDialog.toggle();
+               element.$.accessKeyToast.show();
+             }
+           });
         }
       }
     });
+    
+    function trueReady()
+    {
+      if(polymerReady && gapiReady)
+      {
+        var element = document.querySelector('eans-resume');
+        var tempAccessKey = getURLParameter("a");
+        
+        if(tempAccessKey == null)
+        {
+          element.$.accessDialog.toggle();
+        }
+        else
+        {
+          gapi.client.accesskeys.get({accessKey : tempAccessKey }).execute(function (resp){
+            if(resp.AccessKey == tempAccessKey)
+            {
+              element.accessKeyHolder.AccessKey = tempAccessKey;
+              element.customize(null);
+            }
+            else
+            {
+              element.$.accessDialog.toggle();
+            }
+          });
+        }
+      }
     }
     
     function registerSingleLoadDone()
@@ -246,34 +482,43 @@
       
       if(element.totalLoaded == element.maxLoad)
       {
-        element.page=1;
-        window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300)
+        //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
+        window.setTimeout(function(){element.page=1;},1000);
+        window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300);
+        ga('send', 'event', 'ResumeLoad', element.accessKeyHolder.AccessKey);
       }
     }
-    
     function loadItemsFromApi(apiName,accessKey)
     {
       gapi.client.load(apiName,'v1',function() {
         gapi.client[apiName].list(accessKey).execute(function(res){
-          setItems(res.items,apiName);
+          document.querySelector('eans-resume')[apiName] = res.items;
+          registerSingleLoadDone();
         });
       },'https://eanresume.appspot.com/_ah/api');
     }
     
-    function setItems(items,apiName)
+    function afterGapiLoad()
     {
-      if(!ready)
-      {
-        window.setTimeout(function(){setItems(items,apiName);},300)
-      }
-      else
-      {
-        document.querySelector('eans-resume')[apiName] = items;
-        registerSingleLoadDone();
-      }
+      gapi.client.load('accesskeys','v1',function(){
+        gapiReady = true;
+        trueReady();
+      },'https://eanresume.appspot.com/_ah/api');
+    }
+    
+    function getURLParameter(name) {
+      return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
     }
   </script>
-    <script src="https://apis.google.com/js/client.js?onload=afterGapiLoad">
+  <script src="https://apis.google.com/js/client.js?onload=afterGapiLoad">
   </script>
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
+  ga('create', 'UA-54329940-1', 'auto');
+  ga('send', 'pageview');
+  </script>
 </polymer-element>

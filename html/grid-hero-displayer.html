@@ -1,6 +1,6 @@
 <link rel="import" href="../core-animated-pages/core-animated-pages.html">
 <link rel="import" href="../paper-ripple/paper-ripple.html">
-<polymer-element name="grid-hero-displayer" attributes="items">
+<polymer-element name="grid-hero-displayer" attributes="items,ga">
   <template>
   <style>
     .itemText
@@ -29,10 +29,15 @@
         margin: 8px;
         padding: 16px;
         background-color: rgb(255, 255, 255);
+        width:100px;
+      }
+      .page
+      {
+        position:relative !important;
       }
   </style>
-    <core-animated-pages selected="{{page}}" transitions="hero-transition">
-            <section>
+    <core-animated-pages selected="{{page}}" transitions="hero-transition" on-core-animated-pages-transition-end="{{transEnd}}" flex>
+            <section id="pageOne" class="page" flex>
               <div horizontal layout wrap around-justified start layout on-tap="{{transitionItem}}">
                 <template repeat="{{i in items}}">
                   <core-card class="core_card" vertical layout hero hero-id="item-{{i.name}}" hero?="{{selectedItem === i}}">
@@ -42,7 +47,7 @@
                 </template>
               </div>
             </section>
-            <section>
+            <section id="pageTwo">
                 <core-card class="core_card" vertical layout hero on-tap="{{transitionItem}}" hero-id="item-{{selectedItem.name}}">
                   <div layout horizontal start>
                     <img src="{{selectedItem.image}}" hero hero-id="item-{{selectedItem.name}}-image" width="100px"/>
@@ -69,18 +74,30 @@
   Polymer('grid-hero-displayer', {
     page:0,
     items: [],
+    ga: function(){},
       selectedItem: null,
       transitionItem: function(event)
       {
+        //In order for the pages to have a proper height the page being displayed has to be relative,
+        //but in order for that not to screw up the animation they have to be absolute during the transition
+        //This nice little hack sort of things assures that it all goes smooth
+        this.$.pageTwo.style.position = "absolute";
+        this.$.pageOne.style.position = "absolute";
         if(this.page == 0 && event.target.templateInstance.model.i)
         {
           this.selectedItem = event.target.templateInstance.model.i;
           this.page = 1;
+          this.ga('send', 'event', 'LanguageClicked',event.target.templateInstance.model.i.name);
         }
         else
         {
           this.page = 0;
         }
+      },
+      transEnd: function(event)
+      {
+        this.$.pageOne.style.position = "relative";
+        this.$.pageTwo.style.position = "relative";
       },
     ready: function()
     {

@@ -18,6 +18,3 @@ handlers:
 
 - url: /
   static_dir: html
-  
-builtins:
-- remote_api: on
