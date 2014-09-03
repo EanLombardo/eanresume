@@ -1,0 +1,92 @@
+      .sector {
+        margin: 16px;
+        padding: 8px;
+      }
+      .sectionHeader
+      {
+        font-size: x-large;
+        padding:16px 0px 0px 16px;
+      }
+      a
+      {
+        text-decoration: none;
+      }
+      .experienceName
+      {
+        font-size: large;
+        font-weight:bold;
+      }
+      .experienceName
+      {
+        font-size: normal;
+        font-weight: normal;
+      }
+      .experienceHeader
+      {
+        width: 100%;
+        text-align: center;
+      }
+      .experienceContent
+      {
+        padding: 0px 8px 8px 8px;
+      }
+      #projectResumeInfo
+      {
+        padding:32px;
+      }
+      .refName
+      {
+        float: center;
+        text-align: center;
+      }
+      .refText
+      {
+        max-width: 200px;
+        padding: 8px;
+      }
+      #loadingWrapper{
+        bottom: 0;
+        height: 50px;
+        left: 0;
+        margin: auto;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 500px;
+        text-align: center;
+      }
+      #loadingSection
+      {
+        height:100%;
+        width:100%;
+      }
+      #primaryPages
+      {
+        height:100%;
+        width:100%;
+      }
+      #fab
+      {
+        bottom:16px;
+        right:24px;
+        position:absolute;
+        z-index:1;
+        color: rgb(241, 241, 241);
+        fill: rgb(241, 241, 241);
+        background-color: rgb(66, 133, 244);
+      }
+      .achievement
+      {
+        margin: 8px 20px 8px 20px;
+        padding: 4px;
+      }
+      .noprint
+      {
+        display:none;
+      }
+      .printonly
+      {
+        width:100%;
+        padding:4px;
+        text-align:center;
+      }

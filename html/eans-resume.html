@@ -65,9 +65,6 @@
         margin: 16px;
         padding: 8px;
       }
-      .slideIn {
-        
-      }
       .sectionHeader
       {
         font-size: xx-large;
@@ -162,6 +159,10 @@
         margin: 8px 20px 8px 20px;
         padding: 4px;
       }
+      .printonly
+      {
+        display:none;
+      }
       @media (max-width: 1200px) {
       .sectionPage {
         margin: auto;
@@ -190,6 +191,7 @@
         <paper-button id="accessKeyButton" label="Ok" on-tap="{{customize}}" affirmative></paper-button>
     </paper-dialog>
     <paper-toast id="accessKeyToast" text="{{accessKeyHolder.AccessKey}} is not a valid Access Key"></paper-toast>
+    <paper-toast id="printToast" text="Popups must be allowed in order to print"></paper-toast>
     <paper-fab id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
     <paper-dialog id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
     <div class="aShareLink">
@@ -210,6 +212,7 @@
         <div hidden?="{{page > 1}}" flex>Ean's Resume</div>
         <paper-icon-button hidden?="{{page != 2}}" icon="arrow-back" on-tap="{{backToResume}}"></paper-icon-button>
         <div hidden?="{{page < 2}}" flex>Project Resume</div>
+        <paper-icon-button hidden?="{{page != 1}}" icon="print" on-tap="{{print}}"></paper-icon-button>
         <paper-icon-button hidden?="{{page != 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
         <paper-icon-button icon="social:share-alt" on-click="{{share}}"></paper-icon-button>
       </core-toolbar>
@@ -221,6 +224,7 @@
         </div>
       </section>
       <section id="primarySection" class="sectionPage" vertical layout>
+      <div class="printonly"><p>This document is up to date as of {{today}}. To see an always up to date version see<br><a href="http://eanlom.info/?a={{accessKeyHolder.AccessKey}}">http://eanlom.info/?a={{accessKeyHolder.AccessKey}}</a></p></div>
       <section id="introductionSection">
           <template repeat="{{i in introductions}}">
             <div class="sector" vertical layout><safe-html html="{{i.content}}"></safe-html></div>
@@ -259,15 +263,15 @@
               </template>
            </div>
         </section>
-        <section id="documentSection" hidden?="{{documents == null || references.length == 0}}">
-          <div class="sectionHeader">Document</div>
-          <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
+        <section id="documentSection" class="noprint" hidden?="{{documents == null || references.length == 0}}">
+          <div class="sectionHeader">Documents</div>
+          <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}" toast="{{$.docToast}}"></document-grid>
         </section>
-        <section id="languageSection">
+        <section id="languageSection" class="noprint">
           <div class="sectionHeader">Languages <span class="details"> (Click for More Details)</span></div>
           <grid-hero-displayer id="languageDisplayer" items="{{languages}}" ga="{{ga}}"></grid-hero-displayer>
         </section>
-        <section id="technologiesSection">
+        <section id="technologiesSection" class="noprint">
           <div class="sectionHeader">Technologies <span class="details"> (Click for More Details)</span></div>
           <grid-hero-displayer id="technologiesDisplayers" items="{{technologies}}" ga="{{ga}}"></grid-hero-displayer>
         </section>
@@ -290,7 +294,7 @@
       <div id="projectResumeInfo">
         <p><a href="https://github.com/EanLombardo/eanresume"><strong>Project Resume</strong></a></p>
 
-<p>Project Resume is designed to address the flaws in paper resumes or resumes as a share-able documents. The application was built from the ground up in 8 days and uses modern design principals, in both the application and user experience design, with the latest technologies.</p>
+<p>Project Resume is designed to address the flaws in paper resumes or resumes as a share-able documents. The application was built from the ground up in 8 days and uses modern design principals in both the application and user experience design, with the latest technologies.</p>
 
 <p><strong>The problems with paper resumes</strong></p>
 
@@ -329,11 +333,11 @@
 	</ul>
 	</li>
 	<li>
-	<p>Paper resumes don&rsquo;t utilize your technical skills</p>
+	<p>Paper resumes don&rsquo;t utilize your technical skills:</p>
 
 	<ul>
 		<li>
-		<p>A one dimensional piece of paper can never interact with a potential employer the way an online resume will engage the viewer and promote the skills of a tech savvy job seeker.</p>
+		<p>A simple piece of paper can never interact with a potential employer the way an online resume will engage the viewer and promote the skills of a tech savvy job seeker.</p>
 		</li>
 		<li>
 		<p>This is also true of resumes as a share-able document</p>
@@ -344,25 +348,25 @@
 
 <p><strong>The Goal</strong></p>
 
-<p>Th first goal of Project Resume is meant to address all of the problems with paper resumes. It allows resumes to be easily customized by manipulating data objects in the Datastore. The application then uses these objects to automatically customize itself. Every time the page is visited, the information is shown is up to date. This allows that a potential employer to never see an out dated resume.</p>
+<p>The first goal of Project Resume is meant to address all of the problems with paper resumes. It allows resumes to be easily customized by manipulating data objects in the Datastore. The application then uses these objects to automatically customize itself. Every time the page is visited, the information shown is always up to date. This means a potential employer will never view an out of date resume</p>
 
-<p>The second goal of Project Resume is to endorse my development skills. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a> a potential employer can immediately see how I handle my trade, before even speaking with me. Plus, I have my own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p>
+<p>The second goal of Project Resume is to endorse my development skills. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a>, a potential employer can immediately see how I handle my trade, even before speaking with me.
 
-<p>Project Resume was not only my first Go project, but also my first Polymer project, and my first AppEngine project.</p>
+<p>Project Resume was not only my first Go project, but also my first project using Polymer, and AppEngine.</p>
 
-<p><strong>The </strong><strong>F</strong><strong>rontend</strong></p>
+<p><strong>The Frontend</strong></p>
 
-<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the AccessKey given when the front end first loads. The AccessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
+<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunnicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the AccessKey given when the front end first loads. The AccessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
 
 <p><strong>The Backend</strong></p>
 
 <p>The backend is several CloudEndpoints based REST Apis written in Go. Data objects are stored in Cloud Datastore with an access control list that defines whether or not each item should be shown to a viewer with a specific access key. The service then filters out all of the requested data items and exposes them to the client while stripping the access control list so that the client can&rsquo;t see other parties AccessKeys.</p>
 
-<p>Designing the application in this way allows the resume to automatically customize itself based on the AccessKey provided by hiding objects, and then showing different versions of objects based on the access control list.</p>
+<p>Designing the application in this way allows the resume to automatically customize itself based on the AccessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p> 
 
 <p><strong>UX Design</strong></p>
 
-<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy, so all I have to do is build a browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience. Also Material Design allows the potential employer the feel of paper, without all of the problems of paper resumes.</p>
+<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy. All I had to do is build a easily browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience. Also Material Design allows the potential employer the feel of paper, without all of the problems of paper resumes.</p>
 
       </div>
       </section>
@@ -382,16 +386,19 @@
         polymerReady = true;
         trueReady();
         this.ga = ga;
+        this.today = new Date().toLocaleDateString();
       },
       share: function(event)
       {
         this.$.shareDialog.toggle();
+        ga('send', 'event', 'Share', element.accessKeyHolder.AccessKey);
       },
       maxLoad : apis.length,
       customText: "Loading public resume",
       totalLoaded: 0,
       page:0,
       sharePrivate: false,
+      today :'',
       ga : function(){},
       emailEan : function(event)
       {
@@ -412,6 +419,26 @@
       showProjectResume : function(event)
       {
         this.page = 2;
+        ga('send', 'event', 'ShowProjectResume', element.accessKeyHolder.AccessKey);
+      },
+      print: function(event)
+      {
+        var printWindow = window.open();
+        if(printWindow)
+        {
+          //This is a clever way of bypassing polymer's printing issues
+          var html = this.$.primarySection.innerHTML;
+          printWindow.document.head.innerHTML = '<link rel="stylesheet" type="text/css" href="http://eanlom.info/print.css">';
+          printWindow.document.body.innerHTML = html;
+          //This is a really really poor way to wait for the stylesheet above to finish loading
+          window.setTimeout(function(){printWindow.print();},3000);
+          ga('send', 'event', 'Share', element.accessKeyHolder.AccessKey);
+        }
+        else
+        {
+          this.$.printToast.show();
+          this.ga('send', 'event', 'BadUX', 'PopupBlocked','Print');
+        }
       },
       backToResume: function(event)
       {
