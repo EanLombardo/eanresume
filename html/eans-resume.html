@@ -146,12 +146,21 @@
         width:100%;
         text-align:center;
       }
+      .details
+      {
+        color:gray;
+      }
       paper-progress::shadow #activeProgress {
         background-color: #4285F4;
       }
       .blue
       {
         color:blue;
+      }
+      .achievement
+      {
+        margin: 8px 20px 8px 20px;
+        padding: 4px;
       }
       @media (max-width: 1200px) {
       .sectionPage {
@@ -199,9 +208,9 @@
       <core-toolbar id="core_toolbar" flex>
         <div hidden?="{{page > 1}}" id="eanImageWrapper"><div id="eanImage"></div></div>
         <div hidden?="{{page > 1}}" flex>Ean's Resume</div>
-        <paper-icon-button hidden?="{{page < 2}}" icon="arrow-back" on-tap="{{backToResume}}"></paper-icon-button>
+        <paper-icon-button hidden?="{{page != 2}}" icon="arrow-back" on-tap="{{backToResume}}"></paper-icon-button>
         <div hidden?="{{page < 2}}" flex>Project Resume</div>
-        <paper-icon-button hidden?="{{page > 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
+        <paper-icon-button hidden?="{{page != 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
         <paper-icon-button icon="social:share-alt" on-click="{{share}}"></paper-icon-button>
       </core-toolbar>
       <core-animated-pages id="primaryPages" selected="{{page}}" transitions="cross-fade-all" content>
@@ -220,7 +229,7 @@
         <section id="achievementSection">
           <div class="sectionHeader">Achievements</div>
           <template repeat="{{a in achievements}}">
-            <div class="sector" vertical layout>{{a.text}}</div>
+            <div class="achievement" vertical layout>{{a.text}}</div>
           </template>
         </section>
         <section id="experienceSection">
@@ -251,15 +260,15 @@
            </div>
         </section>
         <section id="documentSection" hidden?="{{documents == null || references.length == 0}}">
-          <div class="sectionHeader">Documents</div>
+          <div class="sectionHeader">Document</div>
           <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
         </section>
         <section id="languageSection">
-          <div class="sectionHeader">Languages</div>
+          <div class="sectionHeader">Languages <span class="details"> (Click for More Details)</span></div>
           <grid-hero-displayer id="languageDisplayer" items="{{languages}}" ga="{{ga}}"></grid-hero-displayer>
         </section>
         <section id="technologiesSection">
-          <div class="sectionHeader">Technologies</div>
+          <div class="sectionHeader">Technologies <span class="details"> (Click for More Details)</span></div>
           <grid-hero-displayer id="technologiesDisplayers" items="{{technologies}}" ga="{{ga}}"></grid-hero-displayer>
         </section>
         <section id="projectsSection">
@@ -281,50 +290,50 @@
       <div id="projectResumeInfo">
         <p><a href="https://github.com/EanLombardo/eanresume"><strong>Project Resume</strong></a></p>
 
-<p>Project Resume was a quickly put together project designed to address all of the flaws in paper resumes or resumes as a share-able document (such as a Google Doc). The application was build from the ground up in 8 days, and uses modern design principals in both application and user experience design, as well as the latest in technologies.</p>
+<p>Project Resume is designed to address the flaws in paper resumes or resumes as a share-able documents. The application was built from the ground up in 8 days and uses modern design principals, in both the application and user experience design, with the latest technologies.</p>
 
 <p><strong>The problems with paper resumes</strong></p>
 
 <ul>
 	<li>
-	<p>Sharing a piece of paper is hard</p>
+	<p>Sharing a piece of paper is cumbersome:</p>
 
 	<ul>
 		<li>
-		<p>You either have to scan it and email it, or copy it and physically pass it around.</p>
+		<p>You either have to scan and email it, or copy it and physically pass it around.</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p>Managing custom resumes can become ridiculous</p>
+	<p>Manually customizing resumes is tedious:</p>
 
 	<ul>
 		<li>
-		<p>As you build customized resumes for more and more potential employers, managing each document becomes harder and harder.</p>
+		<p>Building multiple customized resumes for potential employers is very time consuming.</p>
 		</li>
 		<li>
-		<p>You usually end up with a resume that only has different wording in some places, otherwise properly customizing 20 resumes would take weeks.</p>
+		<p>Managing multiple versions of resumes is difficult and prone to errors that can mean the loss of a potential job opportunity.</p>
 		</li>
 		<li>
-		<p>This is also true of resumes as a share-able document</Sharep>
+		<p>This is also true of resumes as a share-able document.</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p>Paper resumes expire</p>
+	<p>Paper resumes expire:</p>
 
 	<ul>
 		<li>
-		<p>When a potential employer holds on to a resume for any period of time the resume can quickly become out of date, and potential employers can miss out on new and important information.</p>
+		<p>When a potential employer holds on to a resume for any period of time the resume can quickly become out of date. This can result in potential employers being unaware of important new skills and experiences you have acquired.</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p>Paper resumes don&rsquo;t show developers off</p>
+	<p>Paper resumes don&rsquo;t utilize your technical skills</p>
 
 	<ul>
 		<li>
-		<p>A graphical designer can build a really cool and original resume that shows of how good they are at their trade. But for almost every other field a resume is all talk, and does nothing to show how you handle your trade.</p>
+		<p>A one dimensional piece of paper can never interact with a potential employer the way an online resume will engage the viewer and promote the skills of a tech savvy job seeker.</p>
 		</li>
 		<li>
 		<p>This is also true of resumes as a share-able document</p>
@@ -335,17 +344,15 @@
 
 <p><strong>The Goal</strong></p>
 
-<p>Project Resume is meant to address all of the problems with paper resumes. It allows resumes to be easily customized just by manipulating data objects in the datastore, and the application uses these objects to automatically customize itself. Because the application is built in this way, there is no way for a potential employer to have an out of data resume, as every time the page is visited up to date information is shown. The coolest thing though, is the resume shows me off. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a> a potential employer can immediately see how I handle my trade, before even speaking with me.</p>
+<p>Th first goal of Project Resume is meant to address all of the problems with paper resumes. It allows resumes to be easily customized by manipulating data objects in the Datastore. The application then uses these objects to automatically customize itself. Every time the page is visited, the information is shown is up to date. This allows that a potential employer to never see an out dated resume.</p>
 
-<p>Plus I have my own public REST api for my resume, how many people can say that! (<a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API)</a></p>
+<p>The second goal of Project Resume is to endorse my development skills. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a> a potential employer can immediately see how I handle my trade, before even speaking with me. Plus, I have my own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p>
 
-<p><strong>Design</strong></p>
+<p>Project Resume was not only my first Go project, but also my first Polymer project, and my first AppEngine project.</p>
 
-<p>The design goal of this application was for me to, basically, show off. Project Resume was designed from the ground up using the most modern technologies I was aware of, and as such, Project Resume was not only my first real Go project, but also my first Polymer project, and my first AppEngine project.</p>
+<p><strong>The </strong><strong>F</strong><strong>rontend</strong></p>
 
-<p><strong>The frontend</strong></p>
-
-<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend speaks with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the AccessKey given when the front end first loads. The AccessKey can be given as a URL parameter , or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
+<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the AccessKey given when the front end first loads. The AccessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
 
 <p><strong>The Backend</strong></p>
 
@@ -355,7 +362,7 @@
 
 <p><strong>UX Design</strong></p>
 
-<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy, so all I have to do is build a browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience.</p>
+<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy, so all I have to do is build a browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience. Also Material Design allows the potential employer the feel of paper, without all of the problems of paper resumes.</p>
 
       </div>
       </section>

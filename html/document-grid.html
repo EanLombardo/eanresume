@@ -20,7 +20,7 @@
       {
         padding:0px 16px 0px 8px;
       }
-      .core_card {
+      .core_card_small{
         border-top-left-radius: 2px;
         border-top-right-radius: 2px;
         border-bottom-right-radius: 2px;
@@ -46,7 +46,7 @@
   </style>
               <div class="page" horizontal layout wrap around-justified start layout on-tap="{{openDocument}}">
                 <template repeat="{{i in items}}">
-                  <core-card class="core_card page" vertical layout>
+                  <core-card class="core_card_small page" vertical layout>
                     <img src="{{i.image}}" width="100px"/>
                     <div class="itenName">{{i.name}}</div>
                     <paper-ripple class="ripple"></paper-ripple>

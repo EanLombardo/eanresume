@@ -29,6 +29,16 @@
         margin: 8px;
         padding: 16px;
         background-color: rgb(255, 255, 255);
+      }
+      .core_card_small{
+        border-top-left-radius: 2px;
+        border-top-right-radius: 2px;
+        border-bottom-right-radius: 2px;
+        border-bottom-left-radius: 2px;
+        box-shadow: rgba(0, 0, 0, 0.0980392) 0px 2px 4px, rgba(0, 0, 0, 0.0980392) 0px 0px 3px;
+        margin: 8px;
+        padding: 16px;
+        background-color: rgb(255, 255, 255);
         width:100px;
       }
       .page
@@ -40,7 +50,7 @@
             <section id="pageOne" class="page" flex>
               <div horizontal layout wrap around-justified start layout on-tap="{{transitionItem}}">
                 <template repeat="{{i in items}}">
-                  <core-card class="core_card" vertical layout hero hero-id="item-{{i.name}}" hero?="{{selectedItem === i}}">
+                  <core-card class="core_card_small" vertical layout hero hero-id="item-{{i.name}}" hero?="{{selectedItem === i}}">
                     <img src="{{i.image}}" hero hero?="{{selectedItem === i}}" hero-id="item-{{i.name}}-image" width="100px"/>
                     <div class="itenName" hero hero-id="item-{{i.name}}-name" hero?="{{selectedItem === i}}" >{{i.name}}</div>
                   </core-card>
