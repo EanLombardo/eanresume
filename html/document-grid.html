@@ -1,6 +1,7 @@
-<link rel="import" href="../core-animated-pages/core-animated-pages.html">
-<link rel="import" href="../paper-ripple/paper-ripple.html">
-<polymer-element name="document-grid" attributes="items,ga,toast">
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="bower_components/paper-ripple/paper-ripple.html">
+<polymer-element name="document-grid" attributes="items,ga">
   <template>
   <style>
     .itemText
@@ -45,12 +46,14 @@
       }
   </style>
   <paper-toast id="docToast" text="Popups must be allowed in order to open documents"></paper-toast>
-              <div class="page" horizontal layout wrap around-justified start layout on-tap="{{openDocument}}">
+              <div class="page" horizontal layout wrap around-justified start layout>
                 <template repeat="{{i in items}}">
                   <core-card class="core_card_small page" vertical layout>
+                  <a href="{{i.url}}" target="_blank">
                     <img src="{{i.image}}" width="100px"/>
                     <div class="itenName">{{i.name}}</div>
                     <paper-ripple class="ripple"></paper-ripple>
+                  </a>
                   </core-card>
                 </template>
               </div>
@@ -58,25 +61,7 @@
 <script>
   Polymer('document-grid', {
     items: [],
-    ga: function(){},
-    toast: '',
-    openDocument: function(event)
-    {
-      if(event.target.templateInstance.model.i)
-      {
-        var win = window.open(event.target.templateInstance.model.i.url, '_blank');
-        this.ga('send', 'event', 'DocumentOpen', event.target.templateInstance.model.i.name);
-        if(win)
-        {
-          win.focus();
-        }
-        else
-        {
-          this.$.docToast.show();
-          this.ga('send', 'event', 'BadUX', 'PopupBlocked','OpenDocument');
-        }
-      }
-    }
+    ga: function(){}
   });
 </script>
 </polymer-element>

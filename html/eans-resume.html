@@ -1,19 +1,20 @@
-<link rel="import" href="../paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../core-toolbar/core-toolbar.html">
-<link rel="import" href="../core-scroll-header-panel/core-scroll-header-panel.html">
-<link rel="import" href="../core-icons/social-icons.html">
-<link rel="import" href="../core-icons/core-icons.html">
-<link rel="import" href="../core-animated-pages/core-animated-pages.html">
-<link rel="import" href="../core-animated-pages/transitions/slide-from-right.html">
-<link rel="import" href="../paper-ripple/paper-ripple.html">
-<link rel="import" href="../paper-progress/paper-progress.html">
-<link rel="import" href="../paper-dialog/paper-dialog.html">
-<link rel="import" href="../paper-dialog/paper-dialog-transition.html">
-<link rel="import" href="../paper-button/paper-button.html">
-<link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-toast/paper-toast.html">
-<link rel="import" href="../paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../paper-fab/paper-fab.html">
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="bower_components/core-scroll-header-panel/core-scroll-header-panel.html">
+<link rel="import" href="bower_components/core-icons/core-icons.html">
+<link rel="import" href="bower_components/core-icons/social-icons.html">
+<link rel="import" href="bower_components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/slide-from-right.html">
+<link rel="import" href="bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="bower_components/paper-dialog/paper-dialog-transition.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/paper-input/paper-input.html">
+<link rel="import" href="bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="safe-html.html">
 <link rel="import" href="document-grid.html">
 <link rel="import" href="grid-hero-displayer.html">
@@ -112,10 +113,10 @@
         height: 50px;
         left: 0;
         margin: auto;
+        width:100%;
         position: absolute;
         top: 0;
         right: 0;
-        width: 500px;
         text-align: center;
       }
       #loadingSection
@@ -184,14 +185,13 @@
       }
     }
     </style>
+    <iframe id="printFrame" style="display:none"></iframe>
     <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
         <p>If you have been given an Access Key, please enter it below. Otherwise leave the field blank.</p>
         <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.accessKey}}"></paper-input>
         <p>Access keys allow you to see a version of the resume that is customized for your oganization. As well as private imformation like references and transcripts.</p>
-        <paper-button id="accessKeyButton" label="Ok" on-tap="{{customize}}" affirmative></paper-button>
+        <paper-button id="accessKeyButton" on-tap="{{customize}}" affirmative>Ok</paper-button>
     </paper-dialog>
-    <paper-toast id="accessKeyToast" text="{{accessKeyHolder.accessKey}} is not a valid Access Key"></paper-toast>
-    <paper-toast id="printToast" text="Popups must be allowed in order to print"></paper-toast>
     <paper-fab id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
     <paper-dialog id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
     <div class="aShareLink">
@@ -204,7 +204,7 @@
         <a on-click={{copy}} class="blue" hidden?="{{!sharePrivate}}">http://eanlom.info/?a={{accessKeyHolder.accessKey}}</a>
       </p>
     </div>
-    <paper-button label="Ok" affirmative></paper-button>
+    <paper-button affirmative>Ok</paper-button>
     </paper-dialog>
     <core-scroll-header-panel id="core_scroll_header_panel">
       <core-toolbar id="core_toolbar" flex>
@@ -214,7 +214,7 @@
         <div hidden?="{{page < 2}}" flex>Project Resume</div>
         <paper-icon-button hidden?="{{page != 1}}" icon="print" on-tap="{{print}}"></paper-icon-button>
         <paper-icon-button hidden?="{{page != 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
-        <paper-icon-button icon="social:share-alt" on-click="{{share}}"></paper-icon-button>
+        <paper-icon-button icon="social:share" on-click="{{share}}"></paper-icon-button>
       </core-toolbar>
       <core-animated-pages id="primaryPages" selected="{{page}}" transitions="cross-fade-all" content>
       <section id="loadingSection">
@@ -224,6 +224,7 @@
         </div>
       </section>
       <section id="primarySection" class="sectionPage" vertical layout>
+
       <div class="printonly"><p>This document is up to date as of {{today}}. To see an always up to date version see<br><a href="http://eanlom.info/?a={{accessKeyHolder.accessKey}}">http://eanlom.info/?a={{accessKeyHolder.accessKey}}</a></p></div>
       <section id="introductionSection">
           <template repeat="{{i in introductions}}">
@@ -265,7 +266,7 @@
         </section>
         <section id="documentSection" class="noprint" hidden?="{{documents == null || references.length == 0}}">
           <div class="sectionHeader">Documents</div>
-          <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}" toast="{{$.docToast}}"></document-grid>
+          <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
         </section>
         <section id="languageSection" class="noprint">
           <div class="sectionHeader">Languages <span class="details"> (Click for More Details)</span></div>
@@ -362,7 +363,7 @@
 
 <p>The backend is several CloudEndpoints based REST Apis written in Go. Data objects are stored in Cloud Datastore with an access control list that defines whether or not each item should be shown to a viewer with a specific access key. The service then filters out all of the requested data items and exposes them to the client while stripping the access control list so that the client can&rsquo;t see other parties accessKeys.</p>
 
-<p>Designing the application in this way allows the resume to automatically customize itself based on the accessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p> 
+<p>Designing the application in this way allows the resume to automatically customize itself based on the accessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p>
 
 <p><strong>UX Design</strong></p>
 
@@ -374,11 +375,11 @@
     </core-scroll-header-panel>
   </template>
   <script>
-  
+
   var apis = ['experiences','achievements','languages','introductions','projects','references','technologies','documents'];
   var polymerReady = false;
   var gapiReady = false;
-  
+
     Polymer('eans-resume', {
       ready: function ()
       {
@@ -423,7 +424,8 @@
       },
       print: function(event)
       {
-        var printWindow = window.open();
+        var printFrame = this.shadowRoot.querySelector("#printFrame");
+        var printWindow = printFrame.contentWindow;
         if(printWindow)
         {
           //This is a clever way of bypassing polymer's printing issues
@@ -433,11 +435,6 @@
           //This is a really really poor way to wait for the stylesheet above to finish loading
           window.setTimeout(function(){printWindow.print();},3000);
           ga('send', 'event', 'Share', element.accessKeyHolder.accessKey);
-        }
-        else
-        {
-          this.$.printToast.show();
-          this.ga('send', 'event', 'BadUX', 'PopupBlocked','Print');
         }
       },
       backToResume: function(event)
@@ -451,7 +448,7 @@
         if(this.accessKeyHolder.accessKey == "")
         {
           this.accessKeyHolder.accessKey = "nokey";
-          
+
           for(var i =0;i<apis.length;i++)
           {
             loadItemsFromApi(apis[i],element.accessKeyHolder)
@@ -480,14 +477,14 @@
         }
       }
     });
-    
+
     function trueReady()
     {
       if(polymerReady && gapiReady)
       {
         var element = document.querySelector('eans-resume');
         var tempaccessKey = getURLParameter("a");
-        
+
         if(tempaccessKey == null)
         {
           element.$.accessDialog.toggle();
@@ -508,12 +505,12 @@
         }
       }
     }
-    
+
     function registerSingleLoadDone()
     {
       var element = document.querySelector('eans-resume');
       element.totalLoaded = element.totalLoaded + 1;
-      
+
       if(element.totalLoaded == element.maxLoad)
       {
         //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
@@ -531,7 +528,7 @@
         });
       },'https://eanresume.appspot.com/_ah/api');
     }
-    
+
     function afterGapiLoad()
     {
       gapi.client.load('accesskeys','v1',function(){
@@ -539,7 +536,7 @@
         trueReady();
       },'https://eanresume.appspot.com/_ah/api');
     }
-    
+
     function getURLParameter(name) {
       return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
     }

@@ -1,0 +1,16 @@
+[
+  "build/boot.js",
+  "../WeakMap/weakmap.js",
+  "build/if-poly.js",
+  "../ShadowDOM/build.json",
+  "src/ShadowCSS.js",
+  "build/end-if.js",
+  "src/shadowdom.js",
+  "../URL/url.js",
+  "src/lang.js",
+  "../HTMLImports/build.json",
+  "../CustomElements/build.json",
+  "src/dom.js",
+  "src/unresolved.js",
+  "src/module.js"
+]
