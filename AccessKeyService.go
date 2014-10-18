@@ -9,7 +9,7 @@ import (
 )
 
 type AccessKey struct {
-	AccessKey string
+	AccessKey string `json:"accessKey"`
 	Owner     string
 }
 

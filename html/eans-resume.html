@@ -186,22 +186,22 @@
     </style>
     <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
         <p>If you have been given an Access Key, please enter it below. Otherwise leave the field blank.</p>
-        <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.AccessKey}}"></paper-input>
+        <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.accessKey}}"></paper-input>
         <p>Access keys allow you to see a version of the resume that is customized for your oganization. As well as private imformation like references and transcripts.</p>
         <paper-button id="accessKeyButton" label="Ok" on-tap="{{customize}}" affirmative></paper-button>
     </paper-dialog>
-    <paper-toast id="accessKeyToast" text="{{accessKeyHolder.AccessKey}} is not a valid Access Key"></paper-toast>
+    <paper-toast id="accessKeyToast" text="{{accessKeyHolder.accessKey}} is not a valid Access Key"></paper-toast>
     <paper-toast id="printToast" text="Popups must be allowed in order to print"></paper-toast>
     <paper-fab id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
     <paper-dialog id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
     <div class="aShareLink">
      <p>Copy the link below and share this resume with whomever you like.</p>
-     <div hidden?="{{accessKeyHolder.AccessKey == 'nokey'}}">
+     <div hidden?="{{accessKeyHolder.accessKey == 'nokey'}}">
        <paper-checkbox checked="{{sharePrivate}}" label="I am sharing this within my organization"></paper-checkbox>
      </div>
        <p>
         <a on-click={{copy}} class="blue" hidden?="{{sharePrivate}}" >http://eanlom.info/?a=nokey</a>
-        <a on-click={{copy}} class="blue" hidden?="{{!sharePrivate}}">http://eanlom.info/?a={{accessKeyHolder.AccessKey}}</a>
+        <a on-click={{copy}} class="blue" hidden?="{{!sharePrivate}}">http://eanlom.info/?a={{accessKeyHolder.accessKey}}</a>
       </p>
     </div>
     <paper-button label="Ok" affirmative></paper-button>
@@ -224,7 +224,7 @@
         </div>
       </section>
       <section id="primarySection" class="sectionPage" vertical layout>
-      <div class="printonly"><p>This document is up to date as of {{today}}. To see an always up to date version see<br><a href="http://eanlom.info/?a={{accessKeyHolder.AccessKey}}">http://eanlom.info/?a={{accessKeyHolder.AccessKey}}</a></p></div>
+      <div class="printonly"><p>This document is up to date as of {{today}}. To see an always up to date version see<br><a href="http://eanlom.info/?a={{accessKeyHolder.accessKey}}">http://eanlom.info/?a={{accessKeyHolder.accessKey}}</a></p></div>
       <section id="introductionSection">
           <template repeat="{{i in introductions}}">
             <div class="sector" vertical layout><safe-html html="{{i.content}}"></safe-html></div>
@@ -356,13 +356,13 @@
 
 <p><strong>The Frontend</strong></p>
 
-<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunnicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the AccessKey given when the front end first loads. The AccessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
+<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunnicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the accessKey given when the front end first loads. The accessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
 
 <p><strong>The Backend</strong></p>
 
-<p>The backend is several CloudEndpoints based REST Apis written in Go. Data objects are stored in Cloud Datastore with an access control list that defines whether or not each item should be shown to a viewer with a specific access key. The service then filters out all of the requested data items and exposes them to the client while stripping the access control list so that the client can&rsquo;t see other parties AccessKeys.</p>
+<p>The backend is several CloudEndpoints based REST Apis written in Go. Data objects are stored in Cloud Datastore with an access control list that defines whether or not each item should be shown to a viewer with a specific access key. The service then filters out all of the requested data items and exposes them to the client while stripping the access control list so that the client can&rsquo;t see other parties accessKeys.</p>
 
-<p>Designing the application in this way allows the resume to automatically customize itself based on the AccessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p> 
+<p>Designing the application in this way allows the resume to automatically customize itself based on the accessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p> 
 
 <p><strong>UX Design</strong></p>
 
@@ -391,7 +391,7 @@
       share: function(event)
       {
         this.$.shareDialog.toggle();
-        ga('send', 'event', 'Share', element.accessKeyHolder.AccessKey);
+        ga('send', 'event', 'Share', element.accessKeyHolder.accessKey);
       },
       maxLoad : apis.length,
       customText: "Loading public resume",
@@ -419,7 +419,7 @@
       showProjectResume : function(event)
       {
         this.page = 2;
-        ga('send', 'event', 'ShowProjectResume', element.accessKeyHolder.AccessKey);
+        ga('send', 'event', 'ShowProjectResume', element.accessKeyHolder.accessKey);
       },
       print: function(event)
       {
@@ -432,7 +432,7 @@
           printWindow.document.body.innerHTML = html;
           //This is a really really poor way to wait for the stylesheet above to finish loading
           window.setTimeout(function(){printWindow.print();},3000);
-          ga('send', 'event', 'Share', element.accessKeyHolder.AccessKey);
+          ga('send', 'event', 'Share', element.accessKeyHolder.accessKey);
         }
         else
         {
@@ -444,13 +444,13 @@
       {
         this.page = 1;
       },
-      accessKeyHolder: {AccessKey : ""},
+      accessKeyHolder: {accessKey : ""},
       customize: function(event)
       {
         var element = this;
-        if(this.accessKeyHolder.AccessKey == "")
+        if(this.accessKeyHolder.accessKey == "")
         {
-          this.accessKeyHolder.AccessKey = "nokey";
+          this.accessKeyHolder.accessKey = "nokey";
           
           for(var i =0;i<apis.length;i++)
           {
@@ -460,9 +460,9 @@
         else
         {
            gapi.client.accesskeys.get(element.accessKeyHolder).execute(function (resp){
-             if(resp.AccessKey == element.accessKeyHolder.AccessKey)
+             if(resp.accessKey == element.accessKeyHolder.accessKey)
              {
-                if(element.accessKeyHolder.AccessKey != "nokey")
+                if(element.accessKeyHolder.accessKey != "nokey")
                 {
                   element.customText = "Customizing resume for " + resp.Owner;
                 }
@@ -486,18 +486,18 @@
       if(polymerReady && gapiReady)
       {
         var element = document.querySelector('eans-resume');
-        var tempAccessKey = getURLParameter("a");
+        var tempaccessKey = getURLParameter("a");
         
-        if(tempAccessKey == null)
+        if(tempaccessKey == null)
         {
           element.$.accessDialog.toggle();
         }
         else
         {
-          gapi.client.accesskeys.get({accessKey : tempAccessKey }).execute(function (resp){
-            if(resp.AccessKey == tempAccessKey)
+          gapi.client.accesskeys.get({accessKey : tempaccessKey }).execute(function (resp){
+            if(resp.accessKey == tempaccessKey)
             {
-              element.accessKeyHolder.AccessKey = tempAccessKey;
+              element.accessKeyHolder.accessKey = tempaccessKey;
               element.customize(null);
             }
             else
@@ -519,7 +519,7 @@
         //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
         window.setTimeout(function(){element.page=1;},1000);
         window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300);
-        ga('send', 'event', 'ResumeLoad', element.accessKeyHolder.AccessKey);
+        ga('send', 'event', 'ResumeLoad', element.accessKeyHolder.accessKey);
       }
     }
     function loadItemsFromApi(apiName,accessKey)
