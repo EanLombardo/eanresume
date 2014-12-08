@@ -1,5 +1,5 @@
 // AccessKeyService
-package eansresume
+package main
 
 import (
 	"appengine"

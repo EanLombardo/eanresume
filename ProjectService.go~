@@ -1,5 +1,5 @@
 // ProjectService.go
-package eansresume
+package main
 
 import (
 	"appengine"

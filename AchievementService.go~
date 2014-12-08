@@ -1,5 +1,5 @@
 // AchievementService.go
-package eansresume
+package main
 
 import (
 	"appengine"

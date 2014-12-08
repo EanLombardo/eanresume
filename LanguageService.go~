@@ -1,5 +1,5 @@
 // LanguageService.go
-package eansresume
+package main
 
 import (
 	"appengine"

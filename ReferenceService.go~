@@ -1,5 +1,5 @@
 // ReferenceService.go
-package eansresume
+package main
 
 import (
 	"appengine"
