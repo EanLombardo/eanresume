@@ -18,12 +18,3 @@ handlers:
 
 - url: /
   static_dir: html
-  
-inbound_services:
-- warmup
-
-automatic_scaling:
-  min_idle_instances: 1
-  max_idle_instances: 1
-  min_pending_latency: 15.0s
-  max_pending_latency: 15.0s
