@@ -1,5 +1,5 @@
 application: eansresume
-version: v1.1
+version: v2
 threadsafe: true
 
 runtime: go
