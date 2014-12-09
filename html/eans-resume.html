@@ -19,7 +19,6 @@
 <link rel="import" href="document-grid.html">
 <link rel="import" href="grid-hero-displayer.html">
 
-
 <polymer-element name="eans-resume">
 
   <template>
@@ -195,6 +194,7 @@
     <paper-fab id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
     <paper-dialog id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
     <div class="aShareLink">
+      <p>
      <p>Copy the link below and share this resume with whomever you like.</p>
      <div hidden?="{{accessKeyHolder.accessKey == 'nokey'}}">
        <paper-checkbox checked="{{sharePrivate}}" label="I am sharing this within my organization"></paper-checkbox>
@@ -268,13 +268,23 @@
           <div class="sectionHeader">Documents</div>
           <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
         </section>
-        <section id="languageSection" class="noprint">
-          <div class="sectionHeader">Languages <span class="details"> (Click for More Details)</span></div>
-          <grid-hero-displayer id="languageDisplayer" items="{{languages}}" ga="{{ga}}"></grid-hero-displayer>
+        <section id="languageSection">
+          <div class="sectionHeader">Languages <span class="details noprint"> (Click for More Details)</span></div>
+          <grid-hero-displayer id="languageDisplayer" items="{{languages}}" ga="{{ga}}" class="noprint"></grid-hero-displayer>
+          <div class="printonly sector">
+            <template repeat="{{l in languages}}">
+              <span style="padding-right:4em">{{l.name}}</span>
+            </template>
+          </div>
         </section>
-        <section id="technologiesSection" class="noprint">
-          <div class="sectionHeader">Technologies <span class="details"> (Click for More Details)</span></div>
-          <grid-hero-displayer id="technologiesDisplayers" items="{{technologies}}" ga="{{ga}}"></grid-hero-displayer>
+        <section id="technologiesSection">
+          <div class="sectionHeader">Technologies <span class="details noprint"> (Click for More Details)</span></div>
+          <grid-hero-displayer id="technologiesDisplayers" items="{{technologies}}" ga="{{ga}}" class="noprint"></grid-hero-displayer>
+          <div class="printonly sector">
+            <template repeat="{{t in technologies}}">
+              <span style="padding-right:4em">{{t.name}}</span>
+            </template>
+          </div>
         </section>
         <section id="projectsSection">
         <div class="sectionHeader">My Projects</div>
@@ -289,6 +299,20 @@
               <div class="experienceContent"><safe-html html="{{p.content}}"></safe-html></div>
             </div>
           </template>
+          <div class="sector" vertical layout>
+              <div class="experienceHeader">
+                <div><a class="experienceName" href="https://github.com/EanLombardo/eanresume">
+                  Project Resume
+                </a></div>
+                Google AppEngine, Polymer, Google Cloud Endpoints, Google Analytics, Chrome Dev Editor, Google Domains, Google Cloud Datastore
+              </div>
+              <div class="experienceContent printonly">
+                <p>Project resume is an online version of this resume designed to automatically customize itself for the user visiting the page. For more information about project resume see <a href="http://eanlom.info?a={{accessKeyHolder.accessKey}}">http://eanlom.info?a={{accessKeyHolder.accessKey}}</a></p>
+              </div>
+              <div class="experienceContent noprint">
+                <p>This page is part of projecet resume. It was designed as an online resume that automatically customizes itself for the user visiting the page. For more information about project resume click the information button on this page.</p>
+              </div>
+            </div>
         </section>
       </section>
       <section id="projectResumeSection" class="sectionPage">
