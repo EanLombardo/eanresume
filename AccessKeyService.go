@@ -1,5 +1,5 @@
 // AccessKeyService
-package eansresume
+package eanresume
 
 import (
 	"appengine"
@@ -16,7 +16,7 @@ type AccessKey struct {
 type AccessKeyService struct {
 }
 
-func (as *AccessKeyService) Get(r *http.Request, req *ListRequest, resp *AccessKey) error {
+func (as *AccessKeyService) Get(r *http.Request, req *ResumeRequest, resp *AccessKey) error {
 	context := appengine.NewContext(r)
 	query := datastore.NewQuery("accessKey").Filter("AccessKey =", req.AccessKey)
 
@@ -31,6 +31,13 @@ func (as *AccessKeyService) Get(r *http.Request, req *ListRequest, resp *AccessK
 
 	return err
 }
+
+func (key *AccessKey) validate(context appengine.Context) bool {
+	query := datastore.NewQuery("accessKey").Filter("AccessKey =", key.AccessKey)
+	count, _ := query.Count(context)
+	return count == 1
+}
+
 
 func RegisterAccessKeyService() {
 	service := &AccessKeyService{}

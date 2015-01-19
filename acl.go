@@ -1,5 +1,5 @@
 // acl.go
-package eansresume
+package eanresume
 
 import (
 	"strings"

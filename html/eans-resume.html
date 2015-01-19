@@ -220,26 +220,26 @@
       <section id="loadingSection">
         <div id="loadingWrapper">
           <div id="loadingTitle">{{customText}}</div>
-          <paper-progress value="{{totalLoaded}}" max="{{maxLoad}}"></paper-progress>
+          <paper-progress indeterminate></paper-progress>
         </div>
       </section>
       <section id="primarySection" class="sectionPage" vertical layout>
 
       <div class="printonly"><p>This document is up to date as of {{today}}. To see an always up to date version see<br><a href="http://eanlom.info/?a={{accessKeyHolder.accessKey}}">http://eanlom.info/?a={{accessKeyHolder.accessKey}}</a></p></div>
       <section id="introductionSection">
-          <template repeat="{{i in introductions}}">
+          <template repeat="{{i in resume.introductions}}">
             <div class="sector" vertical layout><safe-html html="{{i.content}}"></safe-html></div>
           </template>
        </section>
         <section id="achievementSection">
           <div class="sectionHeader">Achievements</div>
-          <template repeat="{{a in achievements}}">
+          <template repeat="{{a in resume.achievements}}">
             <div class="achievement" vertical layout>{{a.text}}</div>
           </template>
         </section>
         <section id="experienceSection">
           <div class="sectionHeader">Experience</div>
-          <template id="template" repeat="{{e in experiences}}">
+          <template id="template" repeat="{{e in resume.experiences}}">
             <div class="sector" vertical layout>
               <div class="experienceHeader">
                 <div><a class="experienceName" href="{{e.companyUrl}}">
@@ -251,10 +251,10 @@
             </div>
           </template>
         </section>
-        <section id="referencesSection" hidden?="{{references == null || references.length == 0}}">
+        <section id="referencesSection" hidden?="{{resume.references == null || resume.references.length == 0}}">
            <div class="sectionHeader">References</div>
            <div id="referencesContainer" horizontal layout wrap around-justified start>
-             <template id="template" repeat="{{r in references}}">
+             <template id="template" repeat="{{r in resume.references}}">
                 <div class="sector" vertical layout>
                   <div class="refName">{{r.name}}</div>
                   <div class="refPhone"><a href="tel:{r.phone}}">{{r.phone}}</a></div>
@@ -264,31 +264,31 @@
               </template>
            </div>
         </section>
-        <section id="documentSection" class="noprint" hidden?="{{documents == null || references.length == 0}}">
+        <section id="documentSection" class="noprint" hidden?="{{resume.documents == null || resume.references.length == 0}}">
           <div class="sectionHeader">Documents</div>
           <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
         </section>
         <section id="languageSection">
           <div class="sectionHeader">Languages <span class="details noprint"> (Click for More Details)</span></div>
-          <grid-hero-displayer id="languageDisplayer" items="{{languages}}" ga="{{ga}}" class="noprint"></grid-hero-displayer>
+          <grid-hero-displayer id="languageDisplayer" items="{{resume.languages}}" ga="{{ga}}" class="noprint"></grid-hero-displayer>
           <div class="printonly sector">
-            <template repeat="{{l in languages}}">
+            <template repeat="{{l in resume.languages}}">
               <span style="padding-right:4em">{{l.name}}</span>
             </template>
           </div>
         </section>
         <section id="technologiesSection">
           <div class="sectionHeader">Technologies <span class="details noprint"> (Click for More Details)</span></div>
-          <grid-hero-displayer id="technologiesDisplayers" items="{{technologies}}" ga="{{ga}}" class="noprint"></grid-hero-displayer>
+          <grid-hero-displayer id="technologiesDisplayers" items="{{resume.technologies}}" ga="{{ga}}" class="noprint"></grid-hero-displayer>
           <div class="printonly sector">
-            <template repeat="{{t in technologies}}">
+            <template repeat="{{t in resume.technologies}}">
               <span style="padding-right:4em">{{t.name}}</span>
             </template>
           </div>
         </section>
         <section id="projectsSection">
         <div class="sectionHeader">My Projects</div>
-          <template id="projectsTemplate" repeat="{{p in projects}}">
+          <template id="projectsTemplate" repeat="{{p in resume.projects}}">
             <div class="sector" vertical layout>
               <div class="experienceHeader">
                 <div><a class="experienceName" href="{{p.repoUrl}}">
@@ -419,8 +419,9 @@
         ga('send', 'event', 'Share', element.accessKeyHolder.accessKey);
       },
       maxLoad : apis.length,
-      customText: "Loading public resume",
+      customText: "Customizing resume",
       totalLoaded: 0,
+      resume : null,
       page:0,
       sharePrivate: false,
       today :'',
@@ -473,10 +474,7 @@
         {
           this.accessKeyHolder.accessKey = "nokey";
 
-          for(var i =0;i<apis.length;i++)
-          {
-            loadItemsFromApi(apis[i],element.accessKeyHolder)
-          }
+          loadResume(element.accessKeyHolder);
         }
         else
         {
@@ -487,10 +485,7 @@
                 {
                   element.customText = "Customizing resume for " + resp.Owner;
                 }
-                for(var i =0;i<apis.length;i++)
-                {
-                  loadItemsFromApi(apis[i],element.accessKeyHolder)
-                }
+                loadResume(element.accessKeyHolder);
              }
              else
              {
@@ -529,26 +524,15 @@
         }
       }
     }
-
-    function registerSingleLoadDone()
+    function loadResume(accessKey)
     {
-      var element = document.querySelector('eans-resume');
-      element.totalLoaded = element.totalLoaded + 1;
-
-      if(element.totalLoaded == element.maxLoad)
-      {
-        //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
-        window.setTimeout(function(){element.page=1;},1000);
-        window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300);
-        ga('send', 'event', 'ResumeLoad', element.accessKeyHolder.accessKey);
-      }
-    }
-    function loadItemsFromApi(apiName,accessKey)
-    {
-      gapi.client.load(apiName,'v1',function() {
-        gapi.client[apiName].list(accessKey).execute(function(res){
-          document.querySelector('eans-resume')[apiName] = res.items;
-          registerSingleLoadDone();
+      gapi.client.load("resume",'v1',function() {
+        gapi.client.resume.get(accessKey).execute(function(res){
+          document.querySelector('eans-resume').resume = res;
+          //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
+          window.setTimeout(function(){element.page=1;},1000);
+          window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300);
+          ga('send', 'event', 'ResumeLoad', element.accessKeyHolder.accessKey);
         });
       },'https://eanresume.appspot.com/_ah/api');
     }
