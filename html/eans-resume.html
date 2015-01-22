@@ -184,8 +184,9 @@
     <paper-toast id="accessKeyToast" text="That is not a valid Access Key"></paper-toast>
     <paper-toast id="cacheToast" text="The server could not be reached. The resume has been loaded from your cache."></paper-toast>
     <paper-toast id="connectToast" text="The server could not be reached. The access key could not be confirmed."></paper-toast>
+    <paper-toast id="updateToast" text="There is a new update to this application. Please reload the page to update!" duration="60000"><div style="color: #eeff41;" on-tap="{{reload}}">Reload</div></paper-toast>
     <iframe id="printFrame" style="display:none"></iframe>
-    <paper-dialog id="accessDialog" heading="Access Key test" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
+    <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
         <p>If you have been given an Access Key, please enter it below. Otherwise leave the field blank.</p>
         <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.accessKey}}"></paper-input>
         <p>Access keys allow you to see a version of the resume that is customized for your oganization. As well as private imformation like references and transcripts.</p>
@@ -412,6 +413,24 @@
         trueReady();
         this.ga = ga;
         this.today = new Date().toLocaleDateString();
+
+        window.applicationCache.addEventListener("error", function(e) {
+          var gapi = window.gapi = null;
+          afterGapiLoad();
+        });
+
+        setInterval(function(){
+          applicationCache.update();
+        },60000);
+
+        window.applicationCache.addEventListener('updateready', function(e) {
+          applicationCache.swapCache();
+          document.querySelector('eans-resume').$.updateToast.show();
+        });
+      },
+      reload: function(event)
+      {
+        location.reload();
       },
       share: function(event)
       {
@@ -511,7 +530,6 @@
              }
            });
         }
-        }
         else
         {
            if(loadCachedResume(element.accessKeyHolder))
@@ -525,6 +543,7 @@
                  element.$.connectToast.show();
                  element.$.accessDialog.toggle();
                }
+        }
         }
       }
     });
@@ -570,20 +589,21 @@
             }
           });
         }
-        }
         else
         {
-           if(loadCachedResume(element.accessKeyHolder))
+           if(loadCachedResume({accessKey : tempaccessKey }))
                {
                  element.$.primaryPages.transitions = "slide-from-right";
                  element.page=1;
                  element.$.cacheToast.show();
+                 element.accessKeyHolder.accessKey = {accessKey : tempaccessKey };
                }
                else
                {
                  element.$.connectToast.show();
                  element.$.accessDialog.toggle();
                }
+        }
         }
       }
     }
@@ -614,10 +634,18 @@
 
     function afterGapiLoad()
     {
+      if(!!gapi)
+      {
       gapi.client.load('accesskeys','v1',function(){
         gapiReady = true;
         trueReady();
       },'https://eanresume.appspot.com/_ah/api');
+      }
+      else
+      {
+        gapiReady = true;
+        trueReady();
+      }
     }
 
     function getURLParameter(name) {
