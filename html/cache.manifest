@@ -27,8 +27,6 @@ bower_components/webcomponentsjs/webcomponents.js
 bower_components/polymer/polymer.js
 bower_components/core-focusable/polymer-mixin.js
 bower_components/core-focusable/core-focusable.js
-https://apis.google.com/js/client.js
-http://www.google-analytics.com/analytics.js
 
 NETWORK:
 *
