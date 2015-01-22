@@ -1,5 +1,5 @@
 {
-  "name": "Ean Lombardo's Resume",
+  "name": "Ean's Resume",
   "icons": [
     {
       "src": "icons/contacts36.png",
@@ -8,36 +8,36 @@
       "density": "0.75"
     },
     {
-      "src": "icons/contacts48.png",
+      "src": "icons/eanlom48.png",
       "sizes": "48x48",
       "type": "image/png",
       "density": "1.0"
     },
     {
-      "src": "icons/contacts72.png",
+      "src": "icons/eanlom72.png",
       "sizes": "72x72",
       "type": "image/png",
       "density": "1.5"
     },
     {
-      "src": "icons/contacts96.png",
+      "src": "icons/eanlom96.png",
       "sizes": "96x96",
       "type": "image/png",
       "density": "2.0"
     },
     {
-      "src": "icons/contacts144.png",
+      "src": "icons/eanlom144.png",
       "sizes": "144x144",
       "type": "image/png",
       "density": "3.0"
     },
     {
-      "src": "icons/contacts192.png",
+      "src": "icons/eanlom192.png",
       "sizes": "192x192",
       "type": "image/png",
       "density": "4.0"
     }
   ],
   "start_url": "index.html",
-  "display": "standalone",
+  "display": "standalone"
 }
