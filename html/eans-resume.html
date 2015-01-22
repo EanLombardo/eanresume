@@ -181,8 +181,11 @@
       }
     }
     </style>
+    <paper-toast id="accessKeyToast" text="That is not a valid Access Key"></paper-toast>
+    <paper-toast id="cacheToast" text="The server could not be reached. The resume has been loaded from your cache."></paper-toast>
+    <paper-toast id="connectToast" text="The server could not be reached. The access key could not be confirmed."></paper-toast>
     <iframe id="printFrame" style="display:none"></iframe>
-    <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
+    <paper-dialog id="accessDialog" heading="Access Key test" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
         <p>If you have been given an Access Key, please enter it below. Otherwise leave the field blank.</p>
         <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.accessKey}}"></paper-input>
         <p>Access keys allow you to see a version of the resume that is customized for your oganization. As well as private imformation like references and transcripts.</p>
@@ -484,6 +487,21 @@
                 }
                 loadResume(element.accessKeyHolder);
              }
+             else if(!!resp.code)
+             {
+               if(loadCachedResume(element.accessKeyHolder))
+               {
+                 element.$.primaryPages.transitions = "slide-from-right";
+                 element.page=1;
+                 element.$.cacheToast.show();
+               }
+               else
+               {
+                 element.$.connectToast.show();
+                 element.$.accessDialog.toggle();
+               }
+
+             }
              else
              {
                element.$.accessDialog.toggle();
@@ -513,6 +531,20 @@
               element.accessKeyHolder.accessKey = tempaccessKey;
               element.customize(null);
             }
+            else if(!!resp.code)
+             {
+               if(loadCachedResume(element.accessKeyHolder))
+               {
+                 element.$.primaryPages.transitions = "slide-from-right";
+                 element.page=1;
+                 element.$.cacheToast.show();
+               }
+               else
+               {
+                 element.$.connectToast.show();
+               }
+
+             }
             else
             {
               element.$.accessDialog.toggle();
@@ -521,10 +553,22 @@
         }
       }
     }
+
+    function loadCachedResume(accessKey)
+    {
+      if(!!localStorage[accessKey.accessKey])
+      {
+        document.querySelector('eans-resume').resume = JSON.parse(localStorage[accessKey.accessKey]);
+      }
+
+      return !!localStorage[accessKey.accessKey];
+    }
+
     function loadResume(accessKey)
     {
       gapi.client.load("resume",'v1',function() {
         gapi.client.resume.get(accessKey).execute(function(res){
+          localStorage[accessKey.accessKey] = JSON.stringify(res);
           document.querySelector('eans-resume').resume = res;
           //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
           window.setTimeout(function(){element.page=1;},1000);

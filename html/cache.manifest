@@ -1,0 +1,27 @@
+CACHE MANIFEST
+CACHE:
+eans-resume.html
+document-grid.html
+index.html
+bower.json
+icons/eanlom64.png
+icons/eanlom36.png
+icons/eanlom192.png
+icons/eanlom128.png
+icons/eanlom32.png
+icons/eanlom96.png
+icons/eanlom72.png
+icons/eanlom48.png
+icons/eanlom.svg
+icons/eanlom144.png
+word.png
+pdf.png
+print.css
+grid-hero-displayer.html
+mobile_manifest.json
+safe-html.html
+metadata.html
+main.html
+
+NETWORK:
+*
