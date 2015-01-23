@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#Version 2.7.56
+#Version 2.7.58
 CACHE:
 eans-resume.html
 document-grid.html
@@ -21,7 +21,6 @@ print.css
 grid-hero-displayer.html
 mobile_manifest.json
 safe-html.html
-metadata.html
 main.html
 bower_components/webcomponentsjs/webcomponents.js
 bower_components/polymer/polymer.js

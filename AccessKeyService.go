@@ -8,9 +8,24 @@ import (
 	"net/http"
 )
 
+const clientId = "REMOVED"
+
+var (
+	scopes    = []string{endpoints.EmailScope}
+	clientIds = []string{clientId, endpoints.APIExplorerClientID}
+	audiences = []string{clientId}
+)
+
 type AccessKey struct {
 	AccessKey string `json:"accessKey"`
 	Owner     string
+}
+
+type AccessKeyList struct {
+	Keys []AccessKey `json:"keys"`
+}
+
+type EmptyRequest struct {
 }
 
 type AccessKeyService struct {
@@ -32,6 +47,27 @@ func (as *AccessKeyService) Get(r *http.Request, req *ResumeRequest, resp *Acces
 	return err
 }
 
+func (as *AccessKeyService) List(r *http.Request, req *EmptyRequest, resp *AccessKeyList) error {
+	context := appengine.NewContext(r)
+
+	u, err := endpoints.CurrentUser(endpoints.NewContext(r), scopes, audiences, clientIds)
+
+	if err != nil {
+		return err
+	}
+
+	if u == nil {
+		return nil
+	}
+
+	query := datastore.NewQuery("accessKey")
+	_,err = query.GetAll(context, &resp.Keys)
+	context.Errorf("Response %#v", *resp)
+	context.Errorf("User %v", u)
+
+	return err
+}
+
 func (key *AccessKey) validate(context appengine.Context) bool {
 	query := datastore.NewQuery("accessKey").Filter("AccessKey =", key.AccessKey)
 	count, _ := query.Count(context)
@@ -49,5 +85,9 @@ func RegisterAccessKeyService() {
 	}
 
 	info := api.MethodByName("Get").Info()
-	info.Name,info.HTTPMethod, info.Path, info.Desc = "get","GET", "accessKeys", "Get the owner of an access key"
+	info.Name,info.HTTPMethod, info.Path, info.Desc = "get","GET", "get", "Get the owner of an access key"
+
+	info = api.MethodByName("List").Info()
+	info.Name,info.HTTPMethod, info.Path, info.Desc = "list","GET", "list", "Lists all access keys. Requires authentication"
+	info.Scopes, info.ClientIds, info.Audiences = scopes, clientIds, audiences
 }

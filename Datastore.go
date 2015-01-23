@@ -80,6 +80,7 @@ func InsertType(context appengine.Context, kind string,dst interface{}){
 
 func InsertTypes(context appengine.Context){
 	acl:= ACLSystem{true,"google3926"}
+	InsertType(context,"accessKey",&AccessKey{"test","test"})
 	InsertType(context,"achievement",&Achievement{"I did stuff",acl,2})
 	InsertType(context,"document",&Document{"Name","http://f.com/d.pdf","null",acl,2})
 	InsertType(context,"experience",&Experience{"Name co","now","sdvsdvsd","http://flarg.com",acl,2})
@@ -93,7 +94,7 @@ func GetLanguages(key AccessKey, context appengine.Context) ([]Language, error) 
 	var items []Language
 	if key.validate(context) {
 		query := datastore.NewQuery("language").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Language
@@ -119,7 +120,7 @@ func GetAchievements(key AccessKey, context appengine.Context) ([]Achievement, e
 	var items []Achievement
 	if key.validate(context) {
 		query := datastore.NewQuery("achievement").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Achievement
@@ -145,7 +146,7 @@ func GetDocuments(key AccessKey, context appengine.Context) ([]Document, error) 
 	var items []Document
 	if key.validate(context) {
 		query := datastore.NewQuery("document").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Document
@@ -171,7 +172,7 @@ func GetExperiences(key AccessKey, context appengine.Context) ([]Experience, err
 	var items []Experience
 	if key.validate(context) {
 		query := datastore.NewQuery("experience").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Experience
@@ -197,7 +198,7 @@ func GetIntroductions(key AccessKey, context appengine.Context) ([]Introduction,
 	var items []Introduction
 	if key.validate(context) {
 		query := datastore.NewQuery("introduction").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Introduction
@@ -223,7 +224,7 @@ func GetProjects(key AccessKey, context appengine.Context) ([]Project, error) {
 	var items []Project
 	if key.validate(context) {
 		query := datastore.NewQuery("project").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Project
@@ -249,7 +250,7 @@ func GetReferences(key AccessKey, context appengine.Context) ([]Reference, error
 	var items []Reference
 	if key.validate(context) {
 		query := datastore.NewQuery("reference").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Reference
@@ -275,7 +276,7 @@ func GetTechnologies(key AccessKey, context appengine.Context) ([]Technology, er
 	var items []Technology
 	if key.validate(context) {
 		query := datastore.NewQuery("technology").Order("Ordinal")
-		
+
 
 		for t := query.Run(context); ; {
 			var item Technology
