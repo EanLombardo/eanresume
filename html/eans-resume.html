@@ -9,15 +9,22 @@
 <link rel="import" href="bower_components/paper-ripple/paper-ripple.html">
 <link rel="import" href="bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="bower_components/paper-dialog/paper-action-dialog.html">
 <link rel="import" href="bower_components/paper-dialog/paper-dialog-transition.html">
 <link rel="import" href="bower_components/paper-button/paper-button.html">
 <link rel="import" href="bower_components/paper-input/paper-input.html">
 <link rel="import" href="bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="bower_components/paper-item/paper-item.html">
+<link rel="import" href="bower_components/core-menu/core-menu.html">
 <link rel="import" href="bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="safe-html.html">
+<link rel="import" href="social-network-share.html">
 <link rel="import" href="document-grid.html">
 <link rel="import" href="grid-hero-displayer.html">
+<link rel="import" href="lib-ean-resume.html">
 
 <polymer-element name="eans-resume">
 
@@ -35,7 +42,7 @@
         width: 32px;
         height: 32px;
         display: block;
-        background-image: url(icons\eanlom32.png);
+        background-image: url(icons/eanlom32.png);
         margin: 2px;
       }
       #eanImageWrapper{
@@ -160,42 +167,51 @@
       {
         display:none;
       }
+      .blackItem
+      {
+        color:black;
+      }
+      .dropdownWidth
+      {
+        width:200px;
+      }
       @media (max-width: 1200px) {
-      .sectionPage {
-        margin: auto;
+        .sectionPage {
+         margin: auto;
         padding: 0px 0px 64px 0px;
+        }
+        #fab
+        {
+          bottom:8px;
+          right:8px;
+        }
+        .sector {
+          margin: 8px;
+          padding:0px;
+        }
+        .sectionHeader
+        {
+          font-size: x-large;
+          padding:8px;
+        }
       }
-      #fab
-      {
-        bottom:8px;
-        right:8px;
-      }
-      .sector {
-        margin: 8px;
-        padding:0px;
-      }
-      .sectionHeader
-      {
-        font-size: x-large;
-        padding:8px;
-      }
-    }
     </style>
+    <lib-ean-resume id="libResume" accessKeyHolder="{{accessKeyHolder}}" on-lib-eanresume-auth-fail="{{authFail}}" on-lib-eanresume-auth-success="{{authSuccess}}"></lib-ean-resume>
     <paper-toast id="accessKeyToast" text="That is not a valid Access Key"></paper-toast>
     <paper-toast id="cacheToast" text="The server could not be reached. The resume has been loaded from your cache."></paper-toast>
     <paper-toast id="connectToast" text="The server could not be reached. The access key could not be confirmed."></paper-toast>
-    <paper-toast id="updateToast" text="There is a new update to this application. Please reload the page to update!" duration="60000"><div style="color: #eeff41;" on-tap="{{reload}}">Reload</div></paper-toast>
+    <paper-toast id="updateToast" text="There is a new update to this application. Please reload the page to update!" duration="60000"><div style="color: #eeff41;" on-click="{{reload}}">Reload</div></paper-toast>
     <iframe id="printFrame" style="display:none"></iframe>
-    <paper-dialog id="accessDialog" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
+    <paper-action-dialog id="accessDialog" backdrop layered="false" heading="Access Key" transition="paper-dialog-transition-bottom" autoCloseDisabled="true">
         <p>If you have been given an Access Key, please enter it below. Otherwise leave the field blank.</p>
         <paper-input style="width:100%;" label="Access Key" value="{{accessKeyHolder.accessKey}}"></paper-input>
         <p>Access keys allow you to see a version of the resume that is customized for your oganization. As well as private imformation like references and transcripts.</p>
-        <paper-button id="accessKeyButton" on-tap="{{customize}}" affirmative>Ok</paper-button>
-    </paper-dialog>
-    <paper-fab id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
-    <paper-dialog id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
+        <paper-button id="accessKeyButton" on-click="{{sumbitAccessKey}}" affirmative>Ok</paper-button>
+    </paper-action-dialog>
+    <paper-fab hidden?="{{mode == 2}}" id="fab" icon="mail" on-click="{{emailEan}}"></paper-fab>
+    <paper-action-dialog backdrop layered="false" id="shareDialog" heading="Share Ean's Resume" transition="paper-dialog-transition-bottom">
     <div class="aShareLink">
-      <p>
+      <p><social-network-share id="socialPane" link="http://eanlom.info/?a=nokey"></social-network-share></p>
      <p>Copy the link below and share this resume with whomever you like.</p>
      <div hidden?="{{accessKeyHolder.accessKey == 'nokey'}}">
        <paper-checkbox checked="{{sharePrivate}}" label="I am sharing this within my organization"></paper-checkbox>
@@ -206,22 +222,32 @@
       </p>
     </div>
     <paper-button affirmative>Ok</paper-button>
-    </paper-dialog>
+    </paper-action-dialog>
     <core-scroll-header-panel id="core_scroll_header_panel">
       <core-toolbar id="core_toolbar" flex>
         <div hidden?="{{page > 1}}" id="eanImageWrapper"><div id="eanImage"></div></div>
         <div hidden?="{{page > 1}}" flex>Ean's Resume</div>
-        <paper-icon-button hidden?="{{page != 2}}" icon="arrow-back" on-tap="{{backToResume}}"></paper-icon-button>
+        <paper-icon-button hidden?="{{page != 2}}" icon="arrow-back" on-click="{{backToResume}}"></paper-icon-button>
         <div hidden?="{{page < 2}}" flex>Project Resume</div>
-        <paper-icon-button hidden?="{{page != 1}}" icon="print" on-tap="{{print}}"></paper-icon-button>
-        <paper-icon-button hidden?="{{page != 1}}" icon="info" on-tap="{{showProjectResume}}"></paper-icon-button>
-        <paper-icon-button icon="social:share" on-click="{{share}}"></paper-icon-button>
+        <paper-icon-button hidden?="{{page != 1 || mode == 2}}" icon="print" on-click="{{print}}"></paper-icon-button>
+        <paper-icon-button hidden?="{{page != 1 || mode == 2}}" icon="info" on-click="{{showProjectResume}}"></paper-icon-button>
+        <paper-icon-button hidden?="{{mode == 2}}" icon="social:share" on-click="{{share}}"></paper-icon-button>
+        <paper-button on-click="{{login}}" hidden?="{{hideLogin}}">Log In</paper-button>
+        <paper-dropdown-menu hidden?="{{mode != 2}}" label="Select a Resume" class="dropdownWidth" on-core-select={{accessKeySelect}}>
+          <paper-dropdown class="dropdown dropdownWidth">
+            <core-menu class="menu">
+              <template repeat="{{a in accessKeyList}}">
+                <paper-item class="blackItem">{{a.Owner}}</paper-item>
+              </template>
+            </core-menu>
+          </paper-dropdown>
+      </paper-dropdown-menu>
       </core-toolbar>
-      <core-animated-pages id="primaryPages" selected="{{page}}" transitions="cross-fade-all" content>
+      <core-animated-pages id="primaryPages" selected="{{page}}" transitions="slide-from-right" content>
       <section id="loadingSection">
         <div id="loadingWrapper">
           <div id="loadingTitle">{{customText}}</div>
-          <paper-progress indeterminate></paper-progress>
+          <paper-progress indeterminate hidden?="{{mode == 2}}"></paper-progress>
         </div>
       </section>
       <section id="primarySection" class="sectionPage" vertical layout>
@@ -267,7 +293,7 @@
         </section>
         <section id="documentSection" class="noprint" hidden?="{{resume.documents == null || resume.references.length == 0}}">
           <div class="sectionHeader">Documents</div>
-          <document-grid id="documentsDisplayer" items="{{documents}}" ga="{{ga}}"></document-grid>
+          <document-grid id="documentsDisplayer" items="{{resume.documents}}" ga="{{ga}}"></document-grid>
         </section>
         <section id="languageSection">
           <div class="sectionHeader">Languages <span class="details noprint"> (Click for More Details)</span></div>
@@ -303,15 +329,15 @@
           <div class="sector" vertical layout>
               <div class="experienceHeader">
                 <div><a class="experienceName" href="https://github.com/EanLombardo/eanresume">
-                  Project Resume
+                  Project Résumé
                 </a></div>
                 Google AppEngine, Polymer, Google Cloud Endpoints, Google Analytics, Chrome Dev Editor, Google Domains, Google Cloud Datastore
               </div>
               <div class="experienceContent printonly">
-                <p>Project resume is an online version of this resume designed to automatically customize itself for the user visiting the page. For more information about project resume see <a href="http://eanlom.info?a={{accessKeyHolder.accessKey}}">http://eanlom.info?a={{accessKeyHolder.accessKey}}</a></p>
+                <p>Project résumé is an online version of this résumé designed to automatically customize itself for the user visiting the page. For more information about project résumé see <a href="http://eanlom.info?a={{accessKeyHolder.accessKey}}">http://eanlom.info?a={{accessKeyHolder.accessKey}}</a></p>
               </div>
               <div class="experienceContent noprint">
-                <p>This page is part of projecet resume. It was designed as an online resume that automatically customizes itself for the user visiting the page. For more information about project resume click the information button on this page.</p>
+                <p>This page is part of project résumé. It was designed as an online résumé that automatically customizes itself for the user visiting the page. For more information about project résumé click the information button on this page.</p>
               </div>
             </div>
         </section>
@@ -320,9 +346,9 @@
       <div id="projectResumeInfo">
         <p><a href="https://github.com/EanLombardo/eanresume"><strong>Project Resume</strong></a></p>
 
-<p>Project Resume is designed to address the flaws in paper resumes or resumes as a share-able documents. The application was built from the ground up in 8 days and uses modern design principals in both the application and user experience design, with the latest technologies.</p>
+<p>Project Résumé is designed to address the flaws in paper résumés or résumés as a share-able documents. The application was built from the ground up in 8 days and uses modern design principals in both the application and user experience design, with the latest technologies.</p>
 
-<p><strong>The problems with paper resumes</strong></p>
+<p><strong>The problems with paper résumés</strong></p>
 
 <ul>
 	<li>
@@ -335,35 +361,35 @@
 	</ul>
 	</li>
 	<li>
-	<p>Manually customizing resumes is tedious:</p>
+	<p>Manually customizing résumés is tedious:</p>
 
 	<ul>
 		<li>
-		<p>Building multiple customized resumes for potential employers is very time consuming.</p>
+		<p>Building multiple customized résumés for potential employers is very time consuming.</p>
 		</li>
 		<li>
-		<p>Managing multiple versions of resumes is difficult and prone to errors that can mean the loss of a potential job opportunity.</p>
+		<p>Managing multiple versions of résumés is difficult and prone to errors that can mean the loss of a potential job opportunity.</p>
 		</li>
 		<li>
-		<p>This is also true of resumes as a share-able document.</p>
+		<p>This is also true of résumés as a share-able document.</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p>Paper resumes expire:</p>
+	<p>Paper résumés expire:</p>
 
 	<ul>
 		<li>
-		<p>When a potential employer holds on to a resume for any period of time the resume can quickly become out of date. This can result in potential employers being unaware of important new skills and experiences you have acquired.</p>
+		<p>When a potential employer holds on to a résumé for any period of time the résumé can quickly become out of date. This can result in potential employers being unaware of important new skills and experiences you have acquired.</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p>Paper resumes don&rsquo;t utilize your technical skills:</p>
+	<p>Paper résumés don&rsquo;t utilize your technical skills:</p>
 
 	<ul>
 		<li>
-		<p>A simple piece of paper can never interact with a potential employer the way an online resume will engage the viewer and promote the skills of a tech savvy job seeker.</p>
+		<p>A simple piece of paper can never interact with a potential employer the way an online résumé will engage the viewer and promote the skills of a tech savvy job seeker.</p>
 		</li>
 		<li>
 		<p>This is also true of resumes as a share-able document</p>
@@ -374,25 +400,25 @@
 
 <p><strong>The Goal</strong></p>
 
-<p>The first goal of Project Resume is meant to address all of the problems with paper resumes. It allows resumes to be easily customized by manipulating data objects in the Datastore. The application then uses these objects to automatically customize itself. Every time the page is visited, the information shown is always up to date. This means a potential employer will never view an out of date resume</p>
+<p>The first goal of Project Résumé is meant to address all of the problems with paper résumés. It allows résumés to be easily customized by manipulating data objects in the Datastore. The application then uses these objects to automatically customize itself. Every time the page is visited, the information shown is always up to date. This means a potential employer will never view an out of date résumé</p>
 
-<p>The second goal of Project Resume is to endorse my development skills. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a>, a potential employer can immediately see how I handle my trade, even before speaking with me.
+<p>The second goal of Project Résumé is to endorse my development skills. By looking at the application itself, or even <a href="https://github.com/EanLombardo/eanresume">through the code</a>, a potential employer can immediately see how I handle my trade, even before speaking with me.
 
-<p>Project Resume was not only my first Go project, but also my first project using Polymer, and AppEngine.</p>
+<p>Project Résumé was not only my first Go project, but also my first project using Polymer, and AppEngine.</p>
 
 <p><strong>The Frontend</strong></p>
 
-<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunnicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the resume&rsquo;s data from the Resume Services based off of the accessKey given when the front end first loads. The accessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what resume version is loaded, and user interaction.</p>
+<p>The frontend, which you are using right now, was built using a Polymer, html5, css3, and Javascript. The frontend comunnicates with an AppEngine application over a CloudEndpoints based REST service to automatically load the résumé&rsquo;s data from the Résumé Services based off of the accessKey given when the front end first loads. The accessKey can be given as a URL parameter, or entered when the front end loads. The frontend also uses Google Analytics to track who visits the page, what résumé version is loaded, and user interaction.</p>
 
 <p><strong>The Backend</strong></p>
 
 <p>The backend is several CloudEndpoints based REST Apis written in Go. Data objects are stored in Cloud Datastore with an access control list that defines whether or not each item should be shown to a viewer with a specific access key. The service then filters out all of the requested data items and exposes them to the client while stripping the access control list so that the client can&rsquo;t see other parties accessKeys.</p>
 
-<p>Designing the application in this way allows the resume to automatically customize itself based on the accessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my resume. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p>
+<p>Designing the application in this way allows the résumé to automatically customize itself based on the accessKey provided by hiding objects, and then showing different versions of objects based on the access control list. As a result of this design decision, I now have my very own public REST api for my résumé. <a href="http://eanresume.appspot.com/_ah/api/explorer">Explore my API</a></p>
 
 <p><strong>UX Design</strong></p>
 
-<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy. All I had to do is build a easily browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience. Also Material Design allows the potential employer the feel of paper, without all of the problems of paper resumes.</p>
+<p>I am not a User Experience designer. However, I know that a delightful user experience is important in any application. That is why Polymer was chosen for the interface, Polymer makes designing an interface that fits the Material Design language very easy. All I had to do is build a easily browse-able page and follow the Material Design guidelines and Polymer would give me a great user experience. Also Material Design allows the potential employer the feel of paper, without all of the problems of paper résumés.</p>
 
       </div>
       </section>
@@ -401,23 +427,15 @@
   </template>
   <script>
 
-  var apis = ['experiences','achievements','languages','introductions','projects','references','technologies','documents'];
-  var polymerReady = false;
-  var gapiReady = false;
-
     Polymer('eans-resume', {
       ready: function ()
       {
+        parent = this;
+        doc = this.$;
         CoreStyle.g.paperInput.focusedColor = "#4285F4";
         polymerReady = true;
-        trueReady();
         this.ga = ga;
         this.today = new Date().toLocaleDateString();
-
-        window.applicationCache.addEventListener("error", function(e) {
-          var gapi = window.gapi = null;
-          afterGapiLoad();
-        });
 
         setInterval(function(){
           applicationCache.update();
@@ -425,25 +443,61 @@
 
         window.applicationCache.addEventListener('updateready', function(e) {
           applicationCache.swapCache();
-          document.querySelector('eans-resume').$.updateToast.show();
+          doc.updateToast.show();
         });
+
+        tempKey = getURLParameter('a');
+
+        if(getURLParameter("mode") != null)
+        {
+          this.mode = parseInt(getURLParameter('mode'));
+        }
+
+        if(this.mode == 2)
+        {
+          this.$.libResume.handleAuth();
+          this.customText = "Select a Resume";
+        }
+
+        if(tempKey == null && this.mode != 2)
+        {
+          this.$.accessDialog.toggle();
+        }
+        else if(this.mode != 2)
+        {
+          this.accessKeyHolder.accessKey = tempKey;
+          this.fullResumeLoad();
+        }
+
       },
       reload: function(event)
       {
         location.reload();
       },
+      accessKeySelect: function(event)
+      {
+        if(event.detail.isSelected)
+        {
+          this.accessKeyHolder = event.detail.item.templateInstance.model.a;
+          this.page = 0;
+          this.fullResumeLoad();
+        }
+      },
       share: function(event)
       {
         this.$.shareDialog.toggle();
-        ga('send', 'event', 'Share', element.accessKeyHolder.accessKey);
+        this.$.socialPane.render();
+        ga('send', 'event', 'Share', this.accessKeyHolder.accessKey);
       },
-      maxLoad : apis.length,
       customText: "Customizing resume",
       totalLoaded: 0,
       resume : null,
       page:0,
       sharePrivate: false,
+      hideLogin: true,
       today :'',
+      mode: 1,
+      accessKeyList: [],
       ga : function(){},
       emailEan : function(event)
       {
@@ -478,181 +532,73 @@
           printWindow.document.body.innerHTML = html;
           //This is a really really poor way to wait for the stylesheet above to finish loading
           window.setTimeout(function(){printWindow.print();},3000);
-          ga('send', 'event', 'Share', element.accessKeyHolder.accessKey);
+          ga('send', 'event', 'Share', this.accessKeyHolder.accessKey);
         }
+      },
+      authFail: function()
+      {
+        this.hideLogin = false;
+      },
+      authSuccess: function()
+      {
+        this.hideLogin = true;
+        this.$.libResume.fetchAllKeys(function(res){
+          this.accessKeyList = res;
+        }.bind(this));
+      },
+      login: function()
+      {
+        this.$.libResume.signIn();
       },
       backToResume: function(event)
       {
         this.page = 1;
       },
-      accessKeyHolder: {accessKey : ""},
-      customize: function(event)
+      fullResumeLoad: function()
       {
-        var element = this;
+        parent = this;
+        doc = this.$;
+
+        this.$.libResume.fetchAccessKey(function(res){
+          if(res == null)
+          {
+            doc.connectToast.show();
+            doc.accessDialog.toggle();
+          }
+          else if(!!res.error)
+          {
+            doc.accessKeyToast.show();
+            doc.accessDialog.toggle();
+          }
+          else
+          {
+            parent.accessKeyHolder = res;
+            customText = "Customizing resume for " + this.accessKeyHolder.Owner;
+            doc.libResume.fetchResume(function(res){
+              if(res.fromCache)
+              {
+                doc.cacheToast.show();
+              }
+              document.querySelector('eans-resume').resume = res;
+              document.querySelector('eans-resume').page = 1;
+            }.bind(this));
+          }
+        }.bind(this));
+      },
+      accessKeyHolder: {accessKey : ""},
+      sumbitAccessKey: function(event)
+      {
         if(this.accessKeyHolder.accessKey == "")
         {
           this.accessKeyHolder.accessKey = "nokey";
-
-          loadResume(element.accessKeyHolder);
         }
-        else
-        {
-          if(!!gapi)
-          {
-           gapi.client.accesskeys.get(element.accessKeyHolder).execute(function (resp){
-             if(resp.accessKey == element.accessKeyHolder.accessKey)
-             {
-                if(element.accessKeyHolder.accessKey != "nokey")
-                {
-                  element.customText = "Customizing resume for " + resp.Owner;
-                }
-                loadResume(element.accessKeyHolder);
-             }
-             else if(!!resp.code)
-             {
-               if(loadCachedResume(element.accessKeyHolder))
-               {
-                 element.$.primaryPages.transitions = "slide-from-right";
-                 element.page=1;
-                 element.$.cacheToast.show();
-               }
-               else
-               {
-                 element.$.connectToast.show();
-                 element.$.accessDialog.toggle();
-               }
-
-             }
-             else
-             {
-               element.$.accessDialog.toggle();
-               element.$.accessKeyToast.show();
-             }
-           });
-        }
-        else
-        {
-           if(loadCachedResume(element.accessKeyHolder))
-               {
-                 element.$.primaryPages.transitions = "slide-from-right";
-                 element.page=1;
-                 element.$.cacheToast.show();
-               }
-               else
-               {
-                 element.$.connectToast.show();
-                 element.$.accessDialog.toggle();
-               }
-        }
-        }
+        this.fullResumeLoad();
       }
     });
-
-    function trueReady()
-    {
-      if(polymerReady && gapiReady)
-      {
-        var element = document.querySelector('eans-resume');
-        var tempaccessKey = getURLParameter("a");
-
-        if(tempaccessKey == null)
-        {
-          element.$.accessDialog.toggle();
-        }
-        else
-        {
-          if(!!gapi)
-          {
-          gapi.client.accesskeys.get({accessKey : tempaccessKey }).execute(function (resp){
-            if(resp.accessKey == tempaccessKey)
-            {
-              element.accessKeyHolder.accessKey = tempaccessKey;
-              element.customize(null);
-            }
-            else if(!!resp.code)
-             {
-               if(loadCachedResume(element.accessKeyHolder))
-               {
-                 element.$.primaryPages.transitions = "slide-from-right";
-                 element.page=1;
-                 element.$.cacheToast.show();
-               }
-               else
-               {
-                 element.$.connectToast.show();
-               }
-
-             }
-            else
-            {
-              element.$.accessDialog.toggle();
-            }
-          });
-        }
-        else
-        {
-           if(loadCachedResume({accessKey : tempaccessKey }))
-               {
-                 element.$.primaryPages.transitions = "slide-from-right";
-                 element.page=1;
-                 element.$.cacheToast.show();
-                 element.accessKeyHolder.accessKey = {accessKey : tempaccessKey };
-               }
-               else
-               {
-                 element.$.connectToast.show();
-                 element.$.accessDialog.toggle();
-               }
-        }
-        }
-      }
-    }
-
-    function loadCachedResume(accessKey)
-    {
-      if(!!localStorage[accessKey.accessKey])
-      {
-        document.querySelector('eans-resume').resume = JSON.parse(localStorage[accessKey.accessKey]);
-      }
-
-      return !!localStorage[accessKey.accessKey];
-    }
-
-    function loadResume(accessKey)
-    {
-      gapi.client.load("resume",'v1',function() {
-        gapi.client.resume.get(accessKey).execute(function(res){
-          localStorage[accessKey.accessKey] = JSON.stringify(res);
-          document.querySelector('eans-resume').resume = res;
-          //AppEngine is too fast, put a delay in displaying the resume so the user can see the message
-          window.setTimeout(function(){element.page=1;},1000);
-          window.setTimeout(function(){element.$.primaryPages.transitions = "slide-from-right"},300);
-          ga('send', 'event', 'ResumeLoad', element.accessKeyHolder.accessKey);
-        });
-      },'https://eanresume.appspot.com/_ah/api');
-    }
-
-    function afterGapiLoad()
-    {
-      if(!!gapi)
-      {
-      gapi.client.load('accesskeys','v1',function(){
-        gapiReady = true;
-        trueReady();
-      },'https://eanresume.appspot.com/_ah/api');
-      }
-      else
-      {
-        gapiReady = true;
-        trueReady();
-      }
-    }
 
     function getURLParameter(name) {
       return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
     }
-  </script>
-  <script src="https://apis.google.com/js/client.js?onload=afterGapiLoad">
   </script>
   <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

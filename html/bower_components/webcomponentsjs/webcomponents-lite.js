@@ -7,14 +7,13 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-// @version 0.5.0-b6cf8b1
+// @version 0.5.4
 window.WebComponents = window.WebComponents || {};
 
 (function(scope) {
   var flags = scope.flags || {};
   var file = "webcomponents.js";
   var script = document.querySelector('script[src*="' + file + '"]');
-  var flags = {};
   if (!flags.noOpts) {
     location.search.slice(1).split("&").forEach(function(o) {
       o = o.split("=");
@@ -74,10 +73,9 @@ if (typeof WeakMap === "undefined") {
       },
       "delete": function(key) {
         var entry = key[this.name];
-        if (!entry) return false;
-        var hasValue = entry[0] === key;
+        if (!entry || entry[0] !== key) return false;
         entry[0] = entry[1] = undefined;
-        return hasValue;
+        return true;
       },
       has: function(key) {
         var entry = key[this.name];
@@ -91,8 +89,12 @@ if (typeof WeakMap === "undefined") {
 
 (function(global) {
   var registrationsTable = new WeakMap();
-  var setImmediate = window.msSetImmediate;
-  if (!setImmediate) {
+  var setImmediate;
+  if (/Trident|Edge/.test(navigator.userAgent)) {
+    setImmediate = setTimeout;
+  } else if (window.setImmediate) {
+    setImmediate = window.setImmediate;
+  } else {
     var setImmediateQueue = [];
     var sentinel = String(Math.random());
     window.addEventListener("message", function(e) {
@@ -392,15 +394,6 @@ window.HTMLImports = window.HTMLImports || {
 (function(scope) {
   var IMPORT_LINK_TYPE = "import";
   var useNative = Boolean(IMPORT_LINK_TYPE in document.createElement("link"));
-  var modules = [];
-  var addModule = function(module) {
-    modules.push(module);
-  };
-  var initializeModules = function() {
-    modules.forEach(function(module) {
-      module(scope);
-    });
-  };
   var hasShadowDOMPolyfill = Boolean(window.ShadowDOMPolyfill);
   var wrap = function(node) {
     return hasShadowDOMPolyfill ? ShadowDOMPolyfill.wrapIfNeeded(node) : node;
@@ -415,7 +408,7 @@ window.HTMLImports = window.HTMLImports || {
   };
   Object.defineProperty(document, "_currentScript", currentScriptDescriptor);
   Object.defineProperty(rootDocument, "_currentScript", currentScriptDescriptor);
-  var isIE = /Trident/.test(navigator.userAgent);
+  var isIE = /Trident|Edge/.test(navigator.userAgent);
   function whenReady(callback, doc) {
     doc = doc || rootDocument;
     whenDocumentReady(function() {
@@ -514,28 +507,33 @@ window.HTMLImports = window.HTMLImports || {
       }
     })();
   }
-  if (typeof window.CustomEvent !== "function") {
-    window.CustomEvent = function(inType, dictionary) {
-      var e = document.createEvent("HTMLEvents");
-      e.initEvent(inType, dictionary.bubbles === false ? false : true, dictionary.cancelable === false ? false : true, dictionary.detail);
-      return e;
-    };
-  }
   whenReady(function() {
     HTMLImports.ready = true;
     HTMLImports.readyTime = new Date().getTime();
-    rootDocument.dispatchEvent(new CustomEvent("HTMLImportsLoaded", {
-      bubbles: true
-    }));
+    var evt = rootDocument.createEvent("CustomEvent");
+    evt.initCustomEvent("HTMLImportsLoaded", true, true, {});
+    rootDocument.dispatchEvent(evt);
   });
   scope.IMPORT_LINK_TYPE = IMPORT_LINK_TYPE;
   scope.useNative = useNative;
-  scope.addModule = addModule;
-  scope.initializeModules = initializeModules;
   scope.rootDocument = rootDocument;
   scope.whenReady = whenReady;
   scope.isIE = isIE;
-})(window.HTMLImports);
+})(HTMLImports);
+
+(function(scope) {
+  var modules = [];
+  var addModule = function(module) {
+    modules.push(module);
+  };
+  var initializeModules = function() {
+    modules.forEach(function(module) {
+      module(scope);
+    });
+  };
+  scope.addModule = addModule;
+  scope.initializeModules = initializeModules;
+})(HTMLImports);
 
 HTMLImports.addModule(function(scope) {
   var CSS_URL_REGEXP = /(url\()([^)]*)(\))/g;
@@ -565,7 +563,7 @@ HTMLImports.addModule(function(scope) {
 });
 
 HTMLImports.addModule(function(scope) {
-  xhr = {
+  var xhr = {
     async: true,
     ok: function(request) {
       return request.status >= 200 && request.status < 300 || request.status === 304 || request.status === 0;
@@ -642,7 +640,13 @@ HTMLImports.addModule(function(scope) {
     },
     fetch: function(url, elt) {
       flags.load && console.log("fetch", url, elt);
-      if (url.match(/^data:/)) {
+      if (!url) {
+        setTimeout(function() {
+          this.receive(url, elt, {
+            error: "href must be specified"
+          }, null);
+        }.bind(this), 0);
+      } else if (url.match(/^data:/)) {
         var pieces = url.split(",");
         var header = pieces[0];
         var body = pieces[1];
@@ -832,12 +836,7 @@ HTMLImports.addModule(function(scope) {
     },
     addElementToDocument: function(elt) {
       var port = this.rootImportForElement(elt.__importElement || elt);
-      var l = port.__insertedElements = port.__insertedElements || 0;
-      var refNode = port.nextElementSibling;
-      for (var i = 0; i < l; i++) {
-        refNode = refNode && refNode.nextElementSibling;
-      }
-      port.parentNode.insertBefore(elt, refNode);
+      port.parentNode.insertBefore(elt, port);
     },
     trackElement: function(elt, callback) {
       var self = this;
@@ -1017,7 +1016,9 @@ HTMLImports.addModule(function(scope) {
     var base = doc.createElement("base");
     base.setAttribute("href", url);
     if (!doc.baseURI) {
-      doc.baseURI = url;
+      Object.defineProperty(doc, "baseURI", {
+        value: url
+      });
     }
     var meta = doc.createElement("meta");
     meta.setAttribute("charset", "utf-8");
@@ -1049,7 +1050,7 @@ HTMLImports.addModule(function(scope) {
   var importer = scope.importer;
   var dynamic = {
     added: function(nodes) {
-      var owner, parsed;
+      var owner, parsed, loading;
       for (var i = 0, l = nodes.length, n; i < l && (n = nodes[i]); i++) {
         if (!owner) {
           owner = n.ownerDocument;
@@ -1076,9 +1077,19 @@ HTMLImports.addModule(function(scope) {
 });
 
 (function(scope) {
-  initializeModules = scope.initializeModules;
+  var initializeModules = scope.initializeModules;
+  var isIE = scope.isIE;
   if (scope.useNative) {
     return;
+  }
+  if (isIE && typeof window.CustomEvent !== "function") {
+    window.CustomEvent = function(inType, params) {
+      params = params || {};
+      var e = document.createEvent("CustomEvent");
+      e.initCustomEvent(inType, Boolean(params.bubbles), Boolean(params.cancelable), params.detail);
+      return e;
+    };
+    window.CustomEvent.prototype = window.Event.prototype;
   }
   initializeModules();
   var rootDocument = scope.rootDocument;
@@ -1616,6 +1627,7 @@ CustomElements.addModule(function(scope) {
 (function(scope) {
   var useNative = scope.useNative;
   var initializeModules = scope.initializeModules;
+  var isIE11OrOlder = /Trident/.test(navigator.userAgent);
   if (useNative) {
     var nop = function() {};
     scope.watchShadow = nop;
@@ -1659,7 +1671,7 @@ CustomElements.addModule(function(scope) {
       }));
     });
   }
-  if (typeof window.CustomEvent !== "function") {
+  if (isIE11OrOlder && typeof window.CustomEvent !== "function") {
     window.CustomEvent = function(inType, params) {
       params = params || {};
       var e = document.createEvent("CustomEvent");
@@ -1677,6 +1689,32 @@ CustomElements.addModule(function(scope) {
     window.addEventListener(loadEvent, bootstrap);
   }
 })(window.CustomElements);
+
+if (typeof HTMLTemplateElement === "undefined") {
+  (function() {
+    var TEMPLATE_TAG = "template";
+    HTMLTemplateElement = function() {};
+    HTMLTemplateElement.prototype = Object.create(HTMLElement.prototype);
+    HTMLTemplateElement.decorate = function(template) {
+      if (!template.content) {
+        template.content = template.ownerDocument.createDocumentFragment();
+        var child;
+        while (child = template.firstChild) {
+          template.content.appendChild(child);
+        }
+      }
+    };
+    HTMLTemplateElement.bootstrap = function(doc) {
+      var templates = doc.querySelectorAll(TEMPLATE_TAG);
+      for (var i = 0, l = templates.length, t; i < l && (t = templates[i]); i++) {
+        HTMLTemplateElement.decorate(t);
+      }
+    };
+    addEventListener("DOMContentLoaded", function() {
+      HTMLTemplateElement.bootstrap(document);
+    });
+  })();
+}
 
 (function(scope) {
   var style = document.createElement("style");

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const clientId = "REMOVED"
+const clientId = "REDACTED"
 
 var (
 	scopes    = []string{endpoints.EmailScope}
@@ -56,14 +56,14 @@ func (as *AccessKeyService) List(r *http.Request, req *EmptyRequest, resp *Acces
 		return err
 	}
 
-	if u == nil {
+	context.Errorf("User %v", u)
+
+	if u.String() != "el3h6@mst.edu" {
 		return nil
 	}
 
 	query := datastore.NewQuery("accessKey")
 	_,err = query.GetAll(context, &resp.Keys)
-	context.Errorf("Response %#v", *resp)
-	context.Errorf("User %v", u)
 
 	return err
 }

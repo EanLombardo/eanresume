@@ -7,7 +7,7 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-// @version 0.5.0-b6cf8b1
+// @version 0.5.4
 if (typeof WeakMap === "undefined") {
   (function() {
     var defineProperty = Object.defineProperty;
@@ -30,10 +30,9 @@ if (typeof WeakMap === "undefined") {
       },
       "delete": function(key) {
         var entry = key[this.name];
-        if (!entry) return false;
-        var hasValue = entry[0] === key;
+        if (!entry || entry[0] !== key) return false;
         entry[0] = entry[1] = undefined;
-        return hasValue;
+        return true;
       },
       has: function(key) {
         var entry = key[this.name];
@@ -495,7 +494,7 @@ window.ShadowDOMPolyfill = {};
       textNode.data = counter;
     };
   } else {
-    timerFunc = window.setImmediate || window.setTimeout;
+    timerFunc = window.setTimeout;
   }
   function setEndOfMicrotask(func) {
     callbacks.push(func);
@@ -1727,7 +1726,7 @@ window.ShadowDOMPolyfill = {};
   var originalInsertBefore = OriginalNode.prototype.insertBefore;
   var originalRemoveChild = OriginalNode.prototype.removeChild;
   var originalReplaceChild = OriginalNode.prototype.replaceChild;
-  var isIe = /Trident/.test(navigator.userAgent);
+  var isIe = /Trident|Edge/.test(navigator.userAgent);
   var removeChildOriginalHelper = isIe ? function(parent, child) {
     try {
       originalRemoveChild.call(parent, child);
@@ -1960,7 +1959,7 @@ window.ShadowDOMPolyfill = {};
       for (var i = 0, n; i < nodes.length; i++) {
         n = nodes[i];
         if (n.nodeType === Node.TEXT_NODE) {
-          if (!modNode && !n.data.length) this.removeNode(n); else if (!modNode) modNode = n; else {
+          if (!modNode && !n.data.length) this.removeChild(n); else if (!modNode) modNode = n; else {
             s += n.data;
             remNodes.push(n);
           }
@@ -2300,44 +2299,46 @@ window.ShadowDOMPolyfill = {};
 
 (function(scope) {
   "use strict";
-  var setWrapper = scope.setWrapper;
   var unsafeUnwrap = scope.unsafeUnwrap;
+  var enqueueMutation = scope.enqueueMutation;
+  function getClass(el) {
+    return unsafeUnwrap(el).getAttribute("class");
+  }
+  function enqueueClassAttributeChange(el, oldValue) {
+    enqueueMutation(el, "attributes", {
+      name: "class",
+      namespace: null,
+      oldValue: oldValue
+    });
+  }
   function invalidateClass(el) {
     scope.invalidateRendererBasedOnAttribute(el, "class");
   }
-  function DOMTokenList(impl, ownerElement) {
-    setWrapper(impl, this);
-    this.ownerElement_ = ownerElement;
-  }
-  DOMTokenList.prototype = {
-    constructor: DOMTokenList,
-    get length() {
-      return unsafeUnwrap(this).length;
-    },
-    item: function(index) {
-      return unsafeUnwrap(this).item(index);
-    },
-    contains: function(token) {
-      return unsafeUnwrap(this).contains(token);
-    },
-    add: function() {
-      unsafeUnwrap(this).add.apply(unsafeUnwrap(this), arguments);
-      invalidateClass(this.ownerElement_);
-    },
-    remove: function() {
-      unsafeUnwrap(this).remove.apply(unsafeUnwrap(this), arguments);
-      invalidateClass(this.ownerElement_);
-    },
-    toggle: function(token) {
-      var rv = unsafeUnwrap(this).toggle.apply(unsafeUnwrap(this), arguments);
-      invalidateClass(this.ownerElement_);
-      return rv;
-    },
-    toString: function() {
-      return unsafeUnwrap(this).toString();
+  function changeClass(tokenList, method, args) {
+    var ownerElement = tokenList.ownerElement_;
+    if (ownerElement == null) {
+      return method.apply(tokenList, args);
     }
+    var oldValue = getClass(ownerElement);
+    var retv = method.apply(tokenList, args);
+    if (getClass(ownerElement) !== oldValue) {
+      enqueueClassAttributeChange(ownerElement, oldValue);
+      invalidateClass(ownerElement);
+    }
+    return retv;
+  }
+  var oldAdd = DOMTokenList.prototype.add;
+  DOMTokenList.prototype.add = function() {
+    changeClass(this, oldAdd, arguments);
   };
-  scope.wrappers.DOMTokenList = DOMTokenList;
+  var oldRemove = DOMTokenList.prototype.remove;
+  DOMTokenList.prototype.remove = function() {
+    changeClass(this, oldRemove, arguments);
+  };
+  var oldToggle = DOMTokenList.prototype.toggle;
+  DOMTokenList.prototype.toggle = function() {
+    return changeClass(this, oldToggle, arguments);
+  };
 })(window.ShadowDOMPolyfill);
 
 (function(scope) {
@@ -2345,7 +2346,6 @@ window.ShadowDOMPolyfill = {};
   var ChildNodeInterface = scope.ChildNodeInterface;
   var GetElementsByInterface = scope.GetElementsByInterface;
   var Node = scope.wrappers.Node;
-  var DOMTokenList = scope.wrappers.DOMTokenList;
   var ParentNodeInterface = scope.ParentNodeInterface;
   var SelectorsInterface = scope.SelectorsInterface;
   var addWrapNodeListMethod = scope.addWrapNodeListMethod;
@@ -2408,7 +2408,9 @@ window.ShadowDOMPolyfill = {};
     get classList() {
       var list = classListTable.get(this);
       if (!list) {
-        classListTable.set(this, list = new DOMTokenList(unsafeUnwrap(this).classList, this));
+        list = unsafeUnwrap(this).classList;
+        list.ownerElement_ = this;
+        classListTable.set(this, list);
       }
       return list;
     },
@@ -4012,7 +4014,8 @@ window.ShadowDOMPolyfill = {};
     };
     forwardMethodsToWrapper([ window.HTMLDocument || window.Document ], [ "registerElement" ]);
   }
-  forwardMethodsToWrapper([ window.HTMLBodyElement, window.HTMLDocument || window.Document, window.HTMLHeadElement, window.HTMLHtmlElement ], [ "appendChild", "compareDocumentPosition", "contains", "getElementsByClassName", "getElementsByTagName", "getElementsByTagNameNS", "insertBefore", "querySelector", "querySelectorAll", "removeChild", "replaceChild" ].concat(matchesNames));
+  forwardMethodsToWrapper([ window.HTMLBodyElement, window.HTMLDocument || window.Document, window.HTMLHeadElement, window.HTMLHtmlElement ], [ "appendChild", "compareDocumentPosition", "contains", "getElementsByClassName", "getElementsByTagName", "getElementsByTagNameNS", "insertBefore", "querySelector", "querySelectorAll", "removeChild", "replaceChild" ]);
+  forwardMethodsToWrapper([ window.HTMLBodyElement, window.HTMLHeadElement, window.HTMLHtmlElement ], matchesNames);
   forwardMethodsToWrapper([ window.HTMLDocument || window.Document ], [ "adoptNode", "importNode", "contains", "createComment", "createDocumentFragment", "createElement", "createElementNS", "createEvent", "createEventNS", "createRange", "createTextNode", "elementFromPoint", "getElementById", "getElementsByName", "getSelection" ]);
   mixin(Document.prototype, GetElementsByInterface);
   mixin(Document.prototype, ParentNodeInterface);

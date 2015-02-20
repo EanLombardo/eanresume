@@ -9,6 +9,6 @@ import
 func init() {
 	RegisterAccessKeyService()
 	RegisterResumeService()
-	
+	SetupAppcacheHandler()
 	endpoints.HandleHTTP()
 }

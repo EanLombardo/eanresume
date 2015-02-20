@@ -81,6 +81,7 @@ func InsertType(context appengine.Context, kind string,dst interface{}){
 func InsertTypes(context appengine.Context){
 	acl:= ACLSystem{true,"google3926"}
 	InsertType(context,"accessKey",&AccessKey{"test","test"})
+	InsertType(context,"language",&Language{"Go","Moderate","http://golang.org","http://golang.org/golang.png","Golang!!",acl,2})
 	InsertType(context,"achievement",&Achievement{"I did stuff",acl,2})
 	InsertType(context,"document",&Document{"Name","http://f.com/d.pdf","null",acl,2})
 	InsertType(context,"experience",&Experience{"Name co","now","sdvsdvsd","http://flarg.com",acl,2})
