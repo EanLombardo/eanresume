@@ -21,7 +21,7 @@ func (acl *ACLSystem) hasAccess(accessKey string) bool {
 	//The proper way would be to parse the CSV here, but this is faster as it doesn't spend time creating an array, and still only loops through the string once
 	//AccessKeys should be an array instead of CSV, but I don't want to write an editor and the built in
 	index := strings.LastIndex(acl.AccessKeys, usableKey)
-	isInKeys = (index == 0 || (index != -1 && acl.AccessKeys[index] == ','))
+	isInKeys = (index == 0 || (index > 0 && acl.AccessKeys[index - 1] == ','))
 
 	return ((!isInKeys && !acl.IsWhiteList) || (isInKeys && acl.IsWhiteList))
 }

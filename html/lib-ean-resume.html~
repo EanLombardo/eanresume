@@ -1,0 +1,200 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<polymer-element name="lib-ean-resume" attributes="accessKeyHolder">
+<script>
+  Polymer({
+    ready: function(){
+
+      window.eanResApi = this;
+      if((typeof gapi !== 'undefined') && (typeof gapi.client !== 'undefined'))
+      {
+        this.gapiLoaded();
+      }
+    },
+    gapiLoaded: function() {
+      if(!gapi || !gapi.client)
+      {
+        this.loaded = true;
+        this.offline = true;
+        console.log("Gapi could not be loaded, going in to offline mode")
+
+        if(this.waitResume != null)
+        {
+          this.fetchResume(this.waitResume);
+        }
+
+        if(this.waitAccessKey != null)
+        {
+          this.fetchAccessKey(this.waitAccessKey);
+        }
+
+        return
+      }
+      gapi.client.load('accesskeys','v1',function() {
+        gapi.client.load("resume",'v1',function() {
+          this.loaded = true;
+
+          this.fire('lib-eanresume-loaded',{msg : 'lib-ean-resume loaded'});
+
+          if(this.waitResume != null)
+          {
+            this.fetchResume(this.waitResume);
+          }
+
+          if(this.waitAccessKey != null)
+          {
+            this.fetchAccessKey(this.waitAccessKey);
+          }
+        }.bind(this),'https://eanresume.appspot.com/_ah/api');
+      }.bind(this),'https://eanresume.appspot.com/_ah/api');
+    },
+
+    loaded : false,
+    waitResume : null,
+    waitAccessKey : null,
+    offline : false,
+    authorized : false,
+
+    fetchResume : function(resumeCallback)
+    {
+      if(this.offline)
+      {
+        if(!!localStorage['resume.' + this.accessKeyHolder.accessKey])
+        {
+          resume = JSON.parse(localStorage['resume.' + this.accessKeyHolder.accessKey]);
+          resume["fromCache"] = true;
+          resumeCallback(resume);
+        }
+        else
+        {
+          resumeCallback(null);
+        }
+
+        return
+      }
+      if(!this.loaded)
+      {
+        this.waitResume = resumeCallback;
+        return
+      }
+      gapi.client.resume.get(this.accessKeyHolder).execute(function(res){
+        if(!!res.code)
+        {
+          if(!!localStorage['resume.' + this.accessKeyHolder.accessKey])
+          {
+            resume = JSON.parse(localStorage['resume.' + this.accessKeyHolder.accessKey]);
+            resume["fromCache"] = true;
+            resumeCallback(resume);
+          }
+          else
+          {
+            resumeCallback(null);
+          }
+        }
+        else if(res.introductions == null )
+        {
+          resumeCallback({error : 'invalid access key'});
+        }
+        else
+        {
+          localStorage['resume.' + this.accessKeyHolder.accessKey] = JSON.stringify(res);
+          resume = res
+          resume["fromCache"] = false;
+          resumeCallback(resume);
+        }
+      }.bind(this));
+    },
+
+    fetchAccessKey: function(accessKeyCallback)
+    {
+      if(this.offline)
+      {
+        if(!!localStorage['accessKey.' + this.accessKeyHolder.accessKey])
+        {
+          accessKey = JSON.parse(localStorage['accessKey.' + this.accessKeyHolder.accessKey]);
+          accessKey["fromCache"] = true;
+          accessKeyCallback(accessKey);
+        }
+        else
+        {
+          accessKeyCallback(null);
+        }
+
+        return
+      }
+      if(!this.loaded)
+      {
+        this.waitAccessKey = accessKeyCallback;
+        return
+      }
+      gapi.client.accesskeys.get(this.accessKeyHolder).execute(function (res){
+        if(!!res.code)
+        {
+          if(!!localStorage['accessKey.' + this.accessKeyHolder.accessKey])
+          {
+            accessKey = JSON.parse(localStorage['accessKey.' + this.accessKeyHolder.accessKey]);
+            accessKey["fromCache"] = true;
+            accessKeyCallback(accessKey);
+          }
+          else
+          {
+            accessKeyCallback(null);
+          }
+        }
+        else if(res.accessKey != this.accessKeyHolder.accessKey)
+        {
+          accessKeyCallback({error : 'invalid access key'});
+        }
+        else
+        {
+          localStorage['accessKey.' + this.accessKeyHolder.accessKey] = JSON.stringify(res);
+          accessKey = res
+          accessKey["fromCache"] = false;
+          accessKeyCallback(accessKey);
+        }
+      }.bind(this));
+    },
+    fetchAllKeys: function(allKeysCallback)
+    {
+      if(!this.loaded)
+      {
+        setTimeout(function(){this.fetchAllKeys(allKeysCallback)}.bind(this), 1000);
+        return
+      }
+      gapi.client.accesskeys.list().execute(function(res){
+        allKeysCallback(res.keys);
+      }.bind(this));
+    },
+    handleAuth: function()
+    {
+      if(!this.loaded)
+      {
+        setTimeout(function(){this.handleAuth()}.bind(this), 1000);
+        return
+      }
+      gapi.auth.authorize({client_id: 'REDACTED', scope: 'https://www.googleapis.com/auth/userinfo.email', immediate: true}, this.handleAuthResult.bind(this));
+    },
+    signIn: function()
+    {
+      if(!this.loaded)
+      {
+        setTimeout(function(){this.signIn()}.bind(this), 1000);
+        return
+      }
+      gapi.auth.authorize({client_id: 'REDACTED', scope: 'https://www.googleapis.com/auth/userinfo.email', immediate: false}, this.handleAuthResult.bind(this));
+    },
+    handleAuthResult: function(authResult)
+    {
+      if(authResult == null || authResult.error)
+      {
+        this.fire('lib-eanresume-auth-fail',{authResult : authResult});
+      }
+      else
+      {
+        this.authorized = true;
+        this.fire('lib-eanresume-auth-success',{authResult : authResult});
+      }
+    },
+  });
+</script>
+</polymer-element>

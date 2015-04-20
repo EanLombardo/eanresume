@@ -1,0 +1,26 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<polymer-element name="social-network-share" attributes="link">
+    <template id="template">
+      <iframe src="https://www.facebook.com/plugins/like.php?href={{encoded}}&layout=button_count&share=true&width=128"  width="128" allowtransparency="true" frameborder="0" scrolling="no" height="21"></iframe>
+      <iframe allowtransparency="true" frameborder="0" scrolling="no" src="https://platform.twitter.com/widgets/tweet_button.html?url={{encoded}}" style="width:80px; height:20px;"></iframe>
+      <iframe allowtransparency="true" frameborder="0" scrolling="no" src="https://plusone.google.com/_/+1/fastbutton?bsv&size=medium&hl=en-US&url={{encoded}}&origin={{origin}}" style="width:90px; height:20px;"></iframe>
+    </template>
+    <script>
+      Polymer('social-network-share', {
+        ready: function ()
+        {
+          this.encoded = encodeURIComponent(this.link);
+          origin = location.origin;
+        },
+        parseDeclaration: function(elementElement) {
+          this.lightFromTemplate(elementElement.querySelector('template'));
+        },
+        encoded : "",
+        origin : "",
+        render: function ()
+        {
+        }
+      });
+    </script>
+  </polymer-element>
